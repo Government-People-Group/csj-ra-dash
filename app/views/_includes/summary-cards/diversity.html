@@ -1,0 +1,134 @@
+
+{% set ethnicGroup = record.diversity.ethnicGroup %}
+{% set ethnicBackground = record.diversity.ethnicBackground %}
+{% set ethnicBackgroundOther = record.diversity.ethnicBackgroundOther %}
+
+{# Use freetext ethnic background if provided #}
+{% if ethnicBackground and "Another" in ethnicBackground %}
+  {% set ethnicBackground = ethnicBackgroundOther or ethnicBackground %}
+{% endif %}
+
+{# Combine ethnic group and ethnic background #}
+{% set ethnicity %}
+  {{ethnicGroup}}
+  {% if ethnicBackground and ethnicBackground != 'Trainee did not provide any information' %}
+    ({{ethnicBackground | replace('Any other', 'any other')}})
+  {% endif %}
+{% endset %}
+
+{% set ethnicGroupRow = {
+  key: {
+    text: "Ethnicity"
+  },
+  value: {
+    text: ethnicity or 'Trainee did not provide any information'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/diversity/ethnic-group" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "ethnic group"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set disabilities = record.diversity.disabilities %}
+
+{# {% set hasDisabilities = true if record.diversity.disabledAnswer == "They shared that they’re disabled" %} #}
+
+
+{% set hasDisabilities = false %}
+
+{% if disabilities | length > 0 %}
+  {% set noDisabilities = disabilities | includes(data.disabilities.noneOption.value)  %}
+  {% set notProvided = disabilities | includes(data.disabilities.notProvidedOption.value) %}
+  {% set hasDisabilities = true if not (noDisabilities or notProvided) %}
+{% endif %}
+
+{% set disabledAnswer %}
+  {% if hasDisabilities %}
+    <ul class="govuk-list">
+      {% for disability in disabilities %}
+        {% if disability == data.disabilities.otherOption.value and record.diversity.disabilitiesOther %}
+          <li>{{ record.diversity.disabilitiesOther }}</li>
+        {% else %}
+          <li>{{ disability }}</li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    {{record.diversity.disabilities}}
+  {% endif %}
+{% endset %}
+
+{% set disabilitiesAnswerRow = {
+    key: {
+      text: "Disabilities and health conditions"
+    },
+    value: {
+      text: disabledAnswer | safe or "Not provided"
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/diversity/disabilities" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: "disabilities answer"
+        }
+      ]
+    } if canAmend
+  } %}
+
+
+{% set diversityRows = [
+    ethnicGroupRow,
+    disabilitiesAnswerRow
+  ] %}
+
+{% set diversityHtml %}
+  {{ govukSummaryList({
+    rows: diversityRows | highlightInvalidRows
+  }) }}
+{% endset %}
+
+
+
+
+
+{% set complete = record.diversity | sectionIsComplete %}
+{% set status  = record.diversity | getStatusText %}
+{% set sectionIsRequired = record | requiresSection("diversity") %}
+
+{% if not sectionIsRequired %}
+  {# Section not required #}
+{% elseif showIncomplete and not complete %}
+
+  {% set incompleteType = "warning" if errorList %}
+  {% set incompleteId = "diversity-details" %}
+  {% if status == "Review" %}
+    {% set incompleteText = "Diversity information not reviewed" %}
+    {% set incompleteLink = recordPath + "/diversity/confirm" %}
+    {% set incompleteLinkText = "Review section" %}
+  {% elseif status == "In progress" %}
+    {% set incompleteText = "Diversity information not marked as complete" %}
+    {% set incompleteLink = recordPath + "/diversity/confirm" %}
+    {% set incompleteLinkText = "Continue section" %}
+  {% else %}
+    {% set incompleteText = "Diversity information not started" %}
+    {% set incompleteLink = recordPath + "/diversity/ethnic-group" %}
+    {% set incompleteLinkText = "Start section" %}
+  {% endif %}
+
+  {% include "_includes/incomplete.njk" %}
+
+{% else %}
+
+  {{ appSummaryCard({
+    classes: "govuk-!-margin-bottom-6",
+    titleText: "Diversity information",
+    html: diversityHtml
+  }) }}
+  
+{% endif %}

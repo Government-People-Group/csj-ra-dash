@@ -1,0 +1,68 @@
+{% set lastNameLink %}
+<span class="govuk-!-margin-left-2 govuk-!-margin-right-1">
+
+    <a href="{{ currentPageUrl | createSortLink('lastName') }}" class="govuk-link govuk-link--no-visited-state">Name</a>
+
+</span>
+
+{% endset %}
+
+{% set dateUpdatedLink %}
+<span class="govuk-!-margin-left-1 govuk-!-margin-right-1">
+
+    <a href="{{ currentPageUrl | createSortLink('updatedDate') }}" class="govuk-link govuk-link--no-visited-state">Closing date</a>
+
+</span>
+
+{% endset %}
+
+{% set statusLink %}
+<span class="govuk-!-margin-left-1 govuk-!-margin-right-1">
+
+    <a href="{{ currentPageUrl | createSortLink('updatedDate') }}" class="govuk-link govuk-link--no-visited-state">Status</a>
+
+</span>
+
+{% endset %}
+
+{% set requestLink %}
+<span class="govuk-!-margin-left-1 govuk-!-margin-right-1">
+
+    <a href="{{ currentPageUrl | createSortLink('updatedDate') }}" class="govuk-link govuk-link--no-visited-state">Request raised</a>
+
+</span>
+
+{% endset %}
+
+{% set agentLink %}
+<span class="govuk-!-margin-left-1 govuk-!-margin-right-1">
+
+    <a href="{{ currentPageUrl | createSortLink('updatedDate') }}" class="govuk-link govuk-link--no-visited-state">Assigned to</a>
+
+</span>
+
+{% endset %}
+
+<p class="govuk-visually-hidden">Records sorted by {{query.sortOrder}}</p>
+<p class="govuk-body govuk-!-margin-bottom-3">
+  <span class="govuk-!-font-weight-bold" >Sort by:</span> {{ lastNameLink | safe }} | {{ dateUpdatedLink | safe }} | {{ statusLink | safe }} | {{ requestLink | safe }} | {{ agentLink | safe }}
+</p>
+
+
+
+
+{# <div class="records-search">
+  {{ govukInput({
+    label: {
+      html: "Search records",
+      classes: "govuk-label--s"
+    },
+    id: "search",
+    name: "searchQuery",
+    value: query.searchQuery
+  }) }}
+  {{ govukButton({
+    text: "Search"
+  }) }}
+
+</div> #}

@@ -1,0 +1,26 @@
+{% include "_includes/trainee-name-caption.njk" %}
+
+{{ govukRadios({
+  fieldset: {
+    legend: {
+      text: pageHeading,
+      isPageHeading: true,
+      classes: "govuk-fieldset__legend--l"
+    }
+  },
+  items: [
+    {
+      text: "Primary"
+    },
+    {
+      text: "Secondary",
+      hint: {
+        text: "Select secondary if the course covers both phases of education."
+      }
+    }
+  ]
+} | decorateAttributes(record, "record.courseDetails.phase")) }}
+
+{{ govukButton({
+  text: "Continue"
+}) }}

@@ -1,0 +1,58 @@
+{% set reinstateDateText %}
+  {% if record | ittInTheFuture %}
+    Trainee returned before their ITT started
+  {% elseif record.reinstate.date %}
+    {{ record.reinstate.date | govukDate }}
+  {% else %}
+    Not provided
+  {% endif %}
+{% endset %}
+
+{% set reinstateDetailsRows = [
+  {
+    key: {
+      text: "Date of return"
+    },
+    value: {
+      text: reinstateDateText
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/reinstate" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: "reinstate date"
+        }
+      ]
+    } if canAmend
+  },
+  {
+    key: {
+      text: "Expected end date"
+    },
+    value: {
+      text: (record.reinstate.newEndDate or record.courseDetails.endDate) | govukDate
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/reinstate/update-end-date" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: "expected end date"
+        }
+      ]
+    } if canAmend
+  }
+] %}
+
+{% set reinstateDetailsHtml %}
+  {{ govukSummaryList({
+    rows: reinstateDetailsRows
+  }) }}
+{% endset %}
+
+{{ appSummaryCard({
+  classes: "govuk-!-margin-bottom-6",
+  titleText: "Reinstatement details",
+  html: reinstateDetailsHtml
+}) }}

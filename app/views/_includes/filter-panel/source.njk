@@ -1,0 +1,32 @@
+{{ govukCheckboxes({
+  classes: "govuk-checkboxes--small js-auto-submit",
+  fieldset: {
+    legend: {
+      text: "Request type",
+      isPageHeading: false,
+      classes: "govuk-fieldset__legend--s"
+    }
+  },
+  items: [
+    {
+      text: "Application",
+      value: "Manual",
+      checked: checked(query.filterSource, "Manual")
+    },
+    {
+      text: "Online tests",
+      value: "Apply",
+      checked: checked(query.filterSource, "Apply")
+    },
+    {
+      text: "Interview",
+      value: "DTTP",
+      checked: checked(query.filterSource, "DTTP")
+    } if navActive !== "drafts",
+    {
+      text: "Communication",
+      value: "HESA",
+      checked: checked(query.filterSource, "HESA")
+    } if navActive !== "drafts"
+  ]
+} | decorateAttributes(data, "data.filterSource"))}}

@@ -1,0 +1,61 @@
+{% set providers = data.signedInProviders %}
+
+{% set providers = data.providers.accreditingProviders.all | sort(attribute = "name") %}
+
+{% set providerItems = [] %}
+
+{% for provider in providers %}
+  {% set providerItems = providerItems | push({
+    text: provider.name + " (" + (provider.providerCode or "C23") + ")",
+    value: provider.name
+  }) %}
+{% endfor %}
+
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">{{pageHeading}}</h1>
+
+{% set adminInsetContentHtml %}
+
+  <p class="govuk-body">
+    Only change the accredited provider if {{record.provider}} (the current accredited provider) has asked you to.
+  </p>
+
+  <p class="govuk-body govuk-!-margin-bottom-0">
+    The current and new accredited providers will be sent an email confirming the change.
+  </p>
+
+{% endset %}
+
+{{ appAdminFeature({
+  html: adminInsetContentHtml
+}) }}
+
+{{ appAutocompleteFromSelect({
+  label: {
+    text: "New accredited provider",
+    classes: "govuk-label--s"
+  },
+  hint: {
+    html: degreeHint
+  },
+  id: 'provider',
+  name: "record[provider]",
+  items: providerItems,
+  classes: "govuk-!-width-two-thirds",
+  value: null,
+  autocompleteOptions: {
+    autoselect: false,
+    showAllValues: true,
+    minLength: 2,
+    showSuggestionsBanner: false
+  }
+}) }}
+
+{{ govukWarningText({
+  text: "Choosing the wrong accredited provider could lead to a data breach.",
+  iconFallbackText: "Warning"
+}) }}
+
+{{ govukButton({
+  text: "Continue"
+}) }}

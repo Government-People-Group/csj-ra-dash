@@ -1,0 +1,117 @@
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">
+  {{pageHeading}}
+</h1>
+
+<input name='record[courseDetails][subjects][first]' type="hidden" id="subject" value="Early years teaching">
+
+<input name='record[courseDetails][level]' type="hidden" id="subject" value="Early years">
+
+
+{% if record | requiresField("studyMode") %}
+
+  {{ govukRadios({
+    fieldset: {
+      legend: {
+        text: "Full time or part time?",
+        classes: "govuk-fieldset__legend--s"
+      }
+    },
+    hint: {
+      text: ""
+    },
+    items: [
+      {
+        text: "Full time"
+      },
+      {
+        text: "Part time"
+      }
+    ]
+  } | decorateAttributes(record, "record.courseDetails.studyMode")) }}
+
+{% endif %}
+
+
+{% set programmeStartDateArray = record.courseDetails.startDate | toDateArray %}
+
+{% set startDateHint = "For example, " + "" | today | toDateArray | spaceSeparate %}
+
+{% set startDateLabel = "ITT start date" %}
+
+{{ govukDateInput({
+  id: "programme-start-date",
+  namePrefix: "record[courseDetails][startDate]",
+  fieldset: {
+    legend: {
+      text: startDateLabel,
+      classes: "govuk-fieldset__legend--s"
+    }
+  },
+  hint: {
+    html: startDateHint
+  },
+  items: [
+      {
+        name: "day",
+        classes: "govuk-input--width-2",
+        value: programmeStartDateArray["0"]
+      },
+      {
+        name: "month",
+        classes: "govuk-input--width-2",
+        value: programmeStartDateArray["1"]
+      },
+      {
+        name: "year",
+        classes: "govuk-input--width-4",
+        value: programmeStartDateArray["2"]
+      }
+    ]
+}) }}
+
+{% set endDateHint = "For example, " + "" | today | moment('add', 1, 'years') | toDateArray | spaceSeparate %}
+
+{% set endDateLabel = "Expected end date" %}
+
+{% set programmeEndDateArray = record.courseDetails.endDate | toDateArray %}
+{{ govukDateInput({
+  id: "programme-end-date",
+  namePrefix: "record[courseDetails][endDate]",
+  fieldset: {
+    legend: {
+      text: endDateLabel,
+      classes: "govuk-fieldset__legend--s"
+    }
+  },
+  hint: {
+    html: endDateHint
+  },
+  items: [
+      {
+        name: "day",
+        classes: "govuk-input--width-2",
+        value: programmeEndDateArray["0"]
+      },
+      {
+        name: "month",
+        classes: "govuk-input--width-2",
+        value: programmeEndDateArray["1"]
+      },
+      {
+        name: "year",
+        classes: "govuk-input--width-4",
+        value: programmeEndDateArray["2"]
+      }
+    ]
+}) }}
+
+{{ govukButton({
+  text: "Continue"
+}) }}
+
+
+
+
+
+

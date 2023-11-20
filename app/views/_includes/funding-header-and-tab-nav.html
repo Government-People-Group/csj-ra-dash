@@ -1,0 +1,24 @@
+{% set backText = "Home" %}
+{% set backLink = '/home' %}
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds-from-desktop">
+    <span class="govuk-caption-xl">{{ data.signedInProviders | andSeparate }}</span>
+    <h1 class="govuk-heading-xl">{{ pageHeading }}</h1>
+  </div>
+</div>
+
+{{ appSubNavigation({
+  label: 'Sub navigation',
+  classes: 'govuk-!-margin-bottom-4',
+  items: [{
+    text: 'Payment schedule ' + fundingYear,
+    href: "/funding/" + fundingYearShort + "/payment-schedule",
+    active: paymentScheduleTab
+  },
+  {
+    text: 'Trainee summary ' + fundingYear,
+    href: "/funding/" + fundingYearShort + "/trainee-summary",
+    active: traineeSummaryTab
+  }
+]}) }}

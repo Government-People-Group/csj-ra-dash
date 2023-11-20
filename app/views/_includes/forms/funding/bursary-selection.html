@@ -1,0 +1,68 @@
+{# <h1 class="govuk-heading-l">{{pageHeading}}</h1> #}
+
+{% set degreeCount = record.degree.items | length %}
+
+{# Get degree (if it exists) from existing data #}
+{% set degrees = record.degree.items %}
+
+{% set degreeItems = [] %}
+
+{% for degree in degrees %}
+
+  {% set hint %}
+    {% if degree.grade %}
+      <p class="govuk-body govuk-hint govuk-!-margin-bottom-1">
+        {{ degree.grade | prettifyDegreeGrade }}
+      </p>
+    {% endif %}
+    <p class="govuk-body govuk-hint">
+      {{degree | getDegreeHint}}
+    </p>
+  {% endset %}
+
+  {% set degreeItems = degreeItems | push({
+    text: degree | getDegreeName | stripPlaceholders,
+    value: degree.id,
+    hint: {
+      html: hint | safe
+    }
+  }) %}
+
+{% endfor %}
+
+{# Not applicable commented out as you should only see this page if the question is
+relevant #}
+{# {% set degreeItems = degreeItems | push({
+  divider: "or"
+}) %}
+
+{% set degreeItems = degreeItems | push({
+  text: "Not applicable"
+}) %}
+ #}
+{% include "_includes/trainee-name-caption.njk" %}
+
+{{ govukRadios({
+  fieldset: {
+    legend: {
+      text: pageHeading,
+      isPageHeading: true,
+      classes: "govuk-fieldset__legend--l"
+    }
+  },
+  hint: {
+    text: ""
+  },
+  items: degreeItems
+} | decorateAttributes(record, "record.funding.bursary.degreeToBeUsedForBursaries")) }}
+
+
+{{ govukButton({
+  text: "Continue"
+}) }}
+
+
+
+
+
+

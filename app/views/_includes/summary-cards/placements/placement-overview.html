@@ -1,0 +1,123 @@
+{% set placements = record.placement.items %}
+{% set placementCount = record.placement.items | length %}
+
+{% set placementRows = [] %}
+
+{% for placement in placements %}
+
+  {% set placementSchoolHtml %}
+    {% if placement.notApplicable | falsify %}
+      Not applicable
+    {% else %}
+      <p class="govuk-body">{{placement.school.schoolName}}</p>
+      <div class="govuk-hint">{{placement.school | getSchoolHint}}</div>
+    {% endif %}
+  {% endset %}
+
+  {% set placementRows = placementRows | push({
+    key: {
+      text: (loop.index | getOrdinalName | sentenceCase) + " placement"
+    },
+    value: {
+      text: placementSchoolHtml | safe or 'Not provided'
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/placements/" + placement.id + "/details" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: (loop.index | getOrdinalName | sentenceCase) + "placement"
+        }
+      ]
+    } if canAmend and false
+  }) %}
+
+{% endfor %}
+
+{# Make sure there’s always two rows #}
+{% if placementCount == 0 %}
+  {% set placementRows = placementRows | push({
+    key: {
+      text: "First placement"
+    },
+    value: {
+      text: ''
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/placements/add" | addReferrer(referrer),
+          text: "Add",
+          visuallyHiddenText: " placement"
+        }
+      ]
+    } if canAmend
+  } if not record | isDraft ) %}
+{% endif %}
+
+{# Suppresses the action link if there are no placements so we don't end up with two links to the same place #}
+{% if placementCount < 2 %}
+  {% set placementRows = placementRows | push({
+    key: {
+      text: "Second placement"
+    },
+    value: {
+      text: ''
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/placements/add" | addReferrer(referrer),
+          text: "Add",
+          visuallyHiddenText: " placement",
+          suppressActionLink: true if placementCount == 0
+        }
+      ]
+    } if canAmend
+  } if not record | isDraft ) %}
+{% endif %}
+
+{% set placementDetailsHtml %}
+  {{ govukSummaryList({
+    rows: placementRows | highlightInvalidRows({
+      treatEmptyAsMissing: true,
+      recordSource: record.source
+    })
+  }) }}
+{% endset %}
+
+{% set complete = record.placement | sectionIsComplete %}
+{% set status  = record.placement | getStatusText %}
+{% set sectionIsRequired = record | requiresSection("placement") %}
+
+{% if not sectionIsRequired %}
+  {# Section not required #}
+{% elseif showIncomplete and not complete %}
+
+  {% set incompleteType = "warning" if errorList %}
+  {% set incompleteId = "placements" %}
+  {% if status == "In progress" %}
+    {% set incompleteText = "Placement details not marked as complete" %}
+    {% set incompleteLink = recordPath + "/placements/confirm" %}
+    {% set incompleteLinkText = "Continue section" %}
+  {% else %}
+    {% set incompleteText = "Placement details not started" %}
+    {% set incompleteLink = recordPath + "/placements/can-add-placement" %}
+    {% set incompleteLinkText = "Start section" %}
+  {% endif %}
+
+  {% include "_includes/incomplete.njk" %}
+
+{% else %}
+  {{ appSummaryCard({
+    classes: "govuk-!-margin-bottom-6",
+    titleText: 'Placement details',
+    actions: {
+      items: [{
+        href: recordPath + "/placements/confirm" | addReferrer(referrer),
+        text: "Manage placements"
+      }]
+    } if canAmend,
+    html: placementDetailsHtml
+  }) }}
+{% endif %}

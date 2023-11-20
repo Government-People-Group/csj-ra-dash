@@ -1,0 +1,149 @@
+
+{% set checkboxItems = [] %}
+
+{% for trainee in filteredRecords  %}
+
+  {% set traineeHintHtml %}
+    <div class="govuk-hint">{{trainee.courseDetails.subjects | prettifySubjects }}, {{trainee.route | lower}}</div>
+    {{govukTag({
+      text: trainee.status,
+      classes: trainee.status | getStatusClass
+    })}}
+  {% endset %}
+
+  {% set checkboxItems = checkboxItems | push({
+    value: trainee.id,
+    _text: trainee.personalDetails.fullName,
+    checked: checked(selectedTrainees, trainee.id),
+    text: trainee.personalDetails.fullName,
+    hint: {
+      html: traineeHintHtml
+    }
+  }) %}
+
+{% endfor %}
+
+{% set draftIncompleteMessage %}
+
+  {% set draftLinkHtml %}
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <a href="/drafts?filterCompleteStatus=Incomplete" class="govuk-link">View incomplete draft records</a>
+    </p>
+  {% endset %}
+
+  {% set incompleteDraftTextHtml %}
+    {% if incompleteCount != 1 %}
+      <p class="govuk-body">
+        You have {{incompleteCount}} {{'more ' if filteredRecords | length }}draft records that are incomplete and cannot be registered yet. {{ draftLinkHtml | safe }}
+      </p>
+    {% else %}
+      <p class="govuk-body">
+        You have {{incompleteCount}} {{'more ' if filteredRecords | length }}draft record that matches your filters. It is incomplete and cannot be submitted yet. {{ draftLinkHtml | safe }}
+      </p>
+    {% endif %}
+  {% endset %}
+  {{ govukInsetText({
+    html: incompleteDraftTextHtml
+  }) }}
+
+{% endset %}
+
+{% set outstandingActionsIncompleteMessage %}
+
+  {# Todo: this should link to a filtered view of TRN received and outstanding actions required #}
+  {% set linkHtml %}
+    <p class="govuk-body govuk-!-margin-bottom-0">
+      <a href="/records" class="govuk-link">Complete the outstanding actions to recommend them for QTS</a>
+    </p>
+  {% endset %}
+
+  {% set incompleteTextHtml %}
+    {% if incompleteCount != 1 %}
+      <p class="govuk-body">
+        There are {{incompleteCount}} {{'more ' if filteredRecords | length }} records that match your filters, but they have outstanding actions to complete before they can be submitted. {{ linkHtml | safe }}
+      </p>
+    {% else %}
+      <p class="govuk-body">
+        There is {{incompleteCount}} {{'more ' if filteredRecords | length }} record that matches your filters, but it has outstanding actions to complete before it can be submitted. {{ linkHtml | safe }}
+      </p>
+    {% endif %}
+  {% endset %}
+  {{ govukInsetText({
+    html: incompleteTextHtml
+  }) }}
+
+{% endset %}
+
+
+
+{% if filteredRecords | length > 0 %}
+
+  {# H1 separate from legend as we have inset text to put in between #}
+  {% if data.bulk.action == 'Recommend a group of trainees for EYTS or QTS' %}
+
+    <h1 class="govuk-heading-l">{{pageHeading}}</h1>
+
+    {{ govukInsetText({
+      text: "Select trainees that met the EYTS or QTS standards on the same day. You can submit as many groups as you need."
+    }) }}
+
+    {{ govukCheckboxes({
+      fieldset: {
+        legend: {
+          text: pageHeading,
+          isPageHeading: false,
+          classes: "govuk-visually-hidden"
+        }
+      },
+      hint: {
+        text: ""
+      },
+      items: checkboxItems
+    } | decorateAttributes(data, "data.bulk.selectedTrainees")) }}
+
+    {% if incompleteCount %}
+      {{ outstandingActionsIncompleteMessage | safe }}
+    {% endif %}
+
+  {# No inset text, so legend is the h1 #}
+  {% else %}
+
+    {{ govukCheckboxes({
+      fieldset: {
+        legend: {
+          text: pageHeading,
+          isPageHeading: true,
+          classes: "govuk-fieldset__legend--l"
+        }
+      },
+      hint: {
+        text: ""
+      },
+      items: checkboxItems
+    } | decorateAttributes(data, "data.bulk.selectedTrainees")) }}
+
+    {% if incompleteCount %}
+      {{ draftIncompleteMessage | safe }}
+    {% endif %}
+
+  {% endif %}
+
+  {{ govukButton({
+    text: "Continue"
+  }) }}
+
+{% else %}
+
+  <h1 class="govuk-heading-l">{{pageHeading}}</h1>
+
+  {% if incompleteCount %}
+    {{ draftIncompleteMessage | safe }}
+  {% endif %}
+
+  {{ govukButton({
+    text: "Return to records list",
+    href: "/records"
+  }) }}
+
+
+{% endif %}

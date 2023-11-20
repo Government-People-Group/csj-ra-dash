@@ -1,0 +1,116 @@
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">
+  {{pageHeading}}
+</h1>
+
+{% set degreeCount = record.degree.items | length %}
+{% if degreeCount < 1 %}
+{# {% if degreeCount < 1 and action == "add" %} #}
+  {# {% set ukHintText = "For example, BA, BSc or other (please specify)" %} #}
+  {% set ukHintText = "For example, BA or BSc" %}
+{% else %}
+  {% set ukHintText = "For example, BA, BSc, Masters or PhD" %}
+{% endif %}
+
+
+{# Disabled for now in favour of a link in an error message for invalid data #}
+
+{#
+
+{% set insetTextHtml %}
+  <p class="govuk-body">Change this to an <a href="./details?degreeTemp[isInternational]=false{{'' | addReferrer(referrer) }}" class="govuk-link">UK degree</a>.</p>
+{% endset %}
+
+{{ govukInsetText({
+  html: insetTextHtml
+}) }} 
+
+#}
+
+
+{# Degree country #}
+{{ appAutocompleteFromSelect({
+  label: {
+    text: "In which country or territory is the degree institution based?",
+    classes: "govuk-label--s"
+  },
+  id: 'degree-country',
+  name: "degreeTemp[country]",
+  items: data.countries | removeArrayItem("United Kingdom") | toSelectItems,
+  classes: "govuk-!-width-two-thirds",
+  value: degreeTemp.country if data.country != "United Kingdom",
+  autocompleteOptions: {
+    minLength: 2,
+    autoselect: true,
+    showAllValues: false
+  }
+} ) }}
+
+
+{# Degree subject #}
+{% set degreeHint %}
+  Choose from suggestions<span class="app-js-only"> or enter a new subject</span>
+{% endset %}
+
+{{ appAutocompleteFromSelect({
+  label: {
+    text: "Degree subject",
+    classes: "govuk-label--s"
+  },
+  hint: {
+    html: degreeHint
+  },
+  id: 'degree-subject',
+  name: "degreeTemp[subject]",
+  items: data.subjects | toSelectItems,
+  classes: "govuk-!-width-two-thirds",
+  value: degreeTemp.subject,
+  autocompleteOptions: {
+    autoselect: false,
+    showAllValues: false,
+    minLength: 2,
+    showSuggestionsBanner: true
+  }
+} | highlightInvalidInputs ) }}
+
+
+{# Degree type / ENIC #}
+{% set enicItems = [] %}
+{% for enicItem in data.ukComparableDegrees %}
+  {% set enicItems = enicItems | push({
+    text: enicItem,
+    checked: checked(degreeTemp.type, enicItem)
+  }) %}
+{% endfor %}
+{% set enicItems = enicItems | push({divider: 'or'}) %}
+{% set enicItems = enicItems | push({text: 'UK ENIC not provided'}) %}
+
+{{ govukRadios({
+  fieldset: {
+    legend: {
+      text: "Select the UK ENIC comparable degree",
+      classes: "govuk-fieldset__legend--s"
+    }
+  },
+  hint: {
+    text: "Formerly UK NARIC"
+  },
+  items: enicItems
+} | decorateAttributes(degreeTemp, "degreeTemp.typeInt")) }}
+
+{# Graduation year #}
+{{ govukInput({
+  label: {
+    text: "Graduation year",
+    classes: "govuk-label--s"
+  },
+  id: "degree-start-date",
+  name: "degreeTemp[endDate]",
+  value: degreeTemp.endDate,
+  classes: "app-!-max-width-one-quarter"
+}) }}
+
+
+{{ govukButton({
+  text: "Continue"
+}) }}

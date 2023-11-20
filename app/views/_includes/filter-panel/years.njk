@@ -1,0 +1,207 @@
+{% set years = [] %}
+
+{% set allYears = data.years.academicYears %}
+
+{# Default state - first value is 'all' #}
+{% set years = years | push({
+  value: "All years",
+  text: "All years",
+  selected: true if (not query.filterCycle or query.filterCycle == "All years")
+}) %}
+
+{% for yearType in ['', ''] %}
+  {# {% set years = years | push({
+    text: '–',
+    disabled: true
+  }) %} #}
+  {% for year in allYears %}
+
+    {% if year == data.years.currentAcademicYear %}
+      {% set years = years | push({
+        value: year,
+        text: yearType + year + " (current year)",
+        selected: true if (year == query.filterCycle)
+      }) %}
+    {% else %}
+      {% set years = years | push({
+        value: year,
+        text: yearType+ year,
+        selected: true if (year == query.filterCycle)
+      }) %}
+    {% endif %}
+  {% endfor %}
+  {% if loop.first %}
+    {# {% set years = years | push({
+        text: '–',
+        disabled: true
+      }) %} #}
+  {% endif %}
+{% endfor %}
+
+{# Commented out in favour of raw html below #}
+{# {{ govukSelect({
+  id: "cycle-select",
+  name: "filterCycle",
+  classes: "js-auto-submit govuk-!-width-full",
+  label: {
+    text: "Years",
+    classes: "govuk-label--s"
+  },
+  items: years
+}) }} #}
+
+{% set yearsSelect %}
+{# Using HTML because the design system macro for selects does not support optgroup #}
+<div class="govuk-form-group">
+  <label class="govuk-label govuk-label--s" for="years-select">
+    Years
+  </label>
+
+  <select class="govuk-select js-auto-submit govuk-!-width-full" id="years-select" name="filterYears">
+      {% set ?defaultSelected = "selected" if (not query.filterYears or query.filterYears == "All years")%}
+      <option value="All years" {{?defaultSelected}}>All years</option>
+      <optgroup label="Academic years:">
+        {% for year in data.years.academicYears %}
+          {% set value = "Academic year: " + year %}
+          {% set ?selected = "selected" if (value == query.filterYears) %}
+          {% set ?currentYearText = " (current year)" if year == data.years.currentAcademicYear %}
+          <option value="{{value}}" {{?selected}}>In training: {{year}}{{?currentYearText}}</option>
+          {# <option value="{{value}}" {{?selected}}>{{year}}{{?currentYearText}}</option> #}
+        {% endfor %}
+      </optgroup>
+      <optgroup label="Start years:">
+        {% for year in data.years.startAcademicYears %}
+          {% set value = "Start year: " + year %}
+          {% set ?selected = "selected" if (value == query.filterYears) %}
+          {% set ?currentYearText = " (current year)" if year == data.years.currentAcademicYear %}
+          <option value="{{value}}" {{?selected}}>Start: {{year}}{{?currentYearText}}</option>
+        {% endfor %}
+      </optgroup>
+      <optgroup label="End years:">
+        {% for year in data.years.endAcademicYears %}
+          {% set value = "End year: " + year %}
+          {% set ?selected = "selected" if (value == query.filterYears) %}
+          {% set ?currentYearText = " (current year)" if year == data.years.currentAcademicYear %}
+          <option value="End year: {{year}}" {{?selected}}>End: {{year}}{{?currentYearText}}</option>
+        {% endfor %}
+      </optgroup>
+  
+  </select>
+</div>
+{% endset %}
+
+
+
+{% macro yearSelect(params) %}
+
+  {% set yearType = params.yearType %}
+  {% set kebabCaseYearType = yearType %}
+  {% set yearsToInclude = params.yearsToInclude %}
+  {% set name = params.name %}
+
+  {% set years = [] %}
+
+  {# {% set name = "filter" + yearType + "s" %} #}
+
+  {# Default state - first value is 'All years' #}
+  {% set years = years | push({
+    value: "All years",
+    text: "All years",
+    selected: true if (not query[name] or query.query[name] == "All years")
+  }) %}
+
+  {% for year in yearsToInclude %}
+
+    {% if year == data.years.currentAcademicYear %}
+
+      {% set years = years | push({
+        value: year,
+        text: year + " (current year)",
+        selected: true if (year == query[name])
+      }) %}
+
+    {% else %}
+      {% set years = years | push({
+        value: year,
+        text: year,
+        selected: true if (year == query[name])
+      }) %}
+    {% endif %}
+
+  {% endfor %}
+
+  {{ govukSelect({
+    id: "year-select-" + (yearType | kebabCase),
+    name: name,
+    classes: "js-auto-submit govuk-!-width-full",
+    label: {
+      text: yearType,
+      classes: "govuk-label--s"
+    },
+    items: years
+  }) }}
+
+{% endmacro %}
+
+{% set academicYearCheckboxes %}
+  {{ govukCheckboxes({
+    classes: "govuk-checkboxes--small js-auto-submit",
+    fieldset: {
+      legend: {
+        text: "Academic year",
+        isPageHeading: false,
+        classes: "govuk-fieldset__legend--s"
+      }
+    },
+    items: [
+      {
+        text: "2022 to 2023 academic year only",
+        text: "2022 to 2023",
+        value: "2022 to 2023",
+        checked: checked(query.filterAcademicYears, "2022 to 2023")
+      },
+      {
+        text: "2021 to 2022 academic year only",
+        text: "2021 to 2022",
+        value: "2021 to 2022",
+        checked: checked(query.filterAcademicYears, "2021 to 2022")
+      }
+    ]
+  } | decorateAttributes(data, "data.filterAcademicYears"))}}
+{% endset %}
+
+
+{% if data.settings.academicYearsUiStyle == "Combined years filter" %}
+
+  {{ yearsSelect | safe }}
+
+{% else %}
+
+  {% if data.settings.academicYearsUiStyle == "Separate select filter" %}
+
+    {{ yearSelect({
+      yearType: "Academic year",
+      yearsToInclude: data.years.academicYears,
+      name: "filterAcademicYears"
+    }) }}
+
+  {% elseif data.settings.academicYearsUiStyle == "Checkboxes" %}
+
+    {{ academicYearCheckboxes | safe }}
+
+  {% endif %}
+
+  {{ yearSelect({
+    yearType: "Start year",
+    yearsToInclude: data.years.startAcademicYears,
+    name: "filterStartYears"
+  }) }}
+
+  {{ yearSelect({
+    yearType: "End year",
+    yearsToInclude: data.years.endAcademicYears,
+    name: "filterEndYears"
+  }) }}
+
+{% endif %}
+

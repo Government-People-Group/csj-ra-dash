@@ -1,0 +1,49 @@
+{# 
+Example:
+
+|   Trainee on the provider-led (postgrad) route.
+
+#}
+
+{% set routeSwitchUrl %}
+  <a href="{{ './select-route' | addReferrer(referrer) }}" class="govuk-link">{{ record.route or "route not set" }}</a>
+{%- endset %}
+
+{% set providerText %}
+  {# Include a link if using blended model #}
+  {% if data.signedInProviders | length > 1 %}
+    Training with <a href="{{'./pick-provider' | addReferrer(referrer) }}" class="govuk-link">{{ record.provider }}</a>
+  {# Don’t link if using hat model - they need to back out and pick a different provider to work as #}
+  {% else %}
+    Training with {{ record.provider }}
+  {% endif %}
+{% endset %}
+
+
+{% set applyText %}
+  {% if record.courseDetails %}
+    All conditions met and trainee recruited to {{ record.courseDetails.courseNameLong }},
+  {% else %}
+    All conditions met and trainee 
+  {% endif %}
+{% endset %}
+
+{% set routeText %}
+  on the {{ routeSwitchUrl | safe }} route.
+{% endset %}
+
+{# Don’t show anything if user doesn't have multiple providers #}
+{% set insetTextHtml %}
+  {% if data.settings.userProviders | length > 1  %}
+    {{ providerText | safe }} {{ routeText | safe }}
+  {% elseif record | sourceIsManual %}
+    Trainee {{ routeText | safe}}
+  {% else %}
+    {{ applyText }} {{ routeText | safe }}
+  {% endif %}
+{% endset %}
+
+
+{{ govukInsetText({
+  html: insetTextHtml
+}) }}

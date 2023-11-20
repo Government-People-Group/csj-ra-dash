@@ -1,0 +1,53 @@
+{% set customUndergraduateQualification %}
+  {{ govukInput({
+    label: {
+        text: "Qualification",
+        classes: "govuk-label"
+    },
+    classes: "govuk-!-width-two-thirds"
+  } | decorateAttributes(record, "record.undergraduateQualification.typeOther")) }}
+{% endset %}
+
+{% set undergraduateQualifications = []  %}
+
+{% set undergraduateQualifications = undergraduateQualifications | push ({ 
+  text: "Level 3",
+  hint: {
+    text: "For example, A levels, Scottish Highers, Access to Higher Education, or an international Baccalaureate diploma."
+  }
+}) %}
+
+{% set undergraduateQualifications = undergraduateQualifications | push ({ 
+  text: "Level 4 and above",
+  hint: {
+    text: "For example, a foundation diploma, an undergraduate degree, or a postgraduate degree."
+  }
+}) %}
+
+{% set undergraduateQualifications = undergraduateQualifications | push ({ 
+  text: "Other qualification",
+  checked: storeQualificationOther,
+  conditional: {
+    html: customUndergraduateQualification
+  }
+}) %}
+
+{% include "_includes/trainee-name-caption.njk" %}
+
+{{ govukRadios({
+  fieldset: {
+    legend: {
+      text: pageHeading,
+      isPageHeading: true,
+      classes: "govuk-fieldset__legend--l"
+    }
+  },
+  hint: {
+    text: "Give the qualification they’ll have when they start teacher training."
+  },
+  items: undergraduateQualifications
+} | decorateAttributes(record, "record.undergraduateQualification.type")) }}
+
+{{ govukButton({
+  text: "Continue"
+}) }}

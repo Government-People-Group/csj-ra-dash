@@ -1,0 +1,29 @@
+
+{% set otherTraineeUrl = "#" %}
+
+{% for trainee in problem.trainees %}
+  {{trainee | log}}
+  {% if  trainee != record.id %}
+    {% set otherTraineeUrl = "/record/" + trainee %}
+  {% endif %}
+{% endfor %}
+
+{% if record | isDraft %}
+  <p class="govuk-body">
+    This draft trainee has the same details as <a href="{{otherTraineeUrl}}" class="govuk-link" rel="noreferrer noopener" target="_blank">{{record | getShortName}} (opens in a new tab)</a>.
+  </p>
+
+  <p class="govuk-body">
+    You should withdraw or delete one trainee.
+  </p>
+{% else %}
+
+  <p class="govuk-body">
+    You have 2 trainees with the same name and date of birth.
+  </p>
+
+  <p class="govuk-body">
+    You should remove one trainee. <a href="{{otherTraineeUrl}}" class="govuk-link" rel="noreferrer noopener" target="_blank">Open the duplicate trainee in a new tab</a>.
+  </p>
+
+{% endif %}

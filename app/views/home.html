@@ -1,0 +1,107 @@
+{% extends "layouts/main.html" %}
+
+
+
+
+{% block content %}
+
+
+
+
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h2 class="govuk-heading-l">Reasonable adjustment cases</h2>
+
+
+    </div>
+  </div>
+
+
+
+  <div class="govuk-grid-row">
+
+    <div class="govuk-grid-column-full">
+
+      <div class="app-home-statuses app-home-statuses--3-up govuk-!-margin-bottom-4">
+
+
+
+
+        <a href="/records" class="status-card status-card--in-training">
+          <span class="status-card__count">187</span>
+
+          <span class="status-card__status">Open cases</span><span class="govuk-visually-hidden"> records. View these records.</span>
+        </a>
+
+        <a href="#" class="status-card status-card status-card--problem" style="background-color:#d4351cd9; color:#ffffff;">
+          <span class="status-card__count">12</span>
+          <span class="status-card__status">Urgent cases</span><span class="govuk-visually-hidden"></span>
+        </a>
+
+
+        <a href="#" class="status-card status-card--deferred" style="background-color:#b2f68f; color:#000000;">
+          <span class="status-card__count">21</span>
+          <span class="status-card__status">Cases allocated to you</span><span class="govuk-visually-hidden"> records. View these records.</span>
+        </a>
+
+
+
+
+
+      </div>
+
+    </div>
+  </div>
+
+  <br><br>
+
+  <div class="govuk-grid-row">
+
+    <div class="govuk-grid-column-full">
+
+      <div class="app-home-statuses app-home-statuses--3-up govuk-!-margin-bottom-4">
+
+
+        <a href="#" class="status-card"  style="background-color:#285780; color:#ffffff;">
+          <span class="status-card__count">23</span>
+
+          <span class="status-card__status">Candidates with multiple requests for same application</span>
+        </a>
+
+
+
+          <a href="#" class="status-card"  style="background-color:#285780; color:#ffffff;">
+            <span class="status-card__count">34</span>
+            <span class="status-card__status">Candidates with requests for more than one application</span>
+          </a>
+
+          <a href="#" class="status-card status-card status-card--incomplete">
+            <span class="status-card__count">32</span>
+            <span class="status-card__status">Completed cases</span><span class="govuk-visually-hidden"> records. View these records.</span>
+          </a>
+
+
+      </div>
+    </div>
+  </div>
+
+    <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h2 class="govuk-heading-m">Guidance</h2>
+
+      <ul class="govuk-list govuk-list--spaced">
+        <li><a class="govuk-link" href="#">Working a reasonable adjustments case</a></li>
+        <li><a class="govuk-link" href="#">Reasonable adjustment policies and legislation</a></li>
+      </ul>
+    </div>
+
+  </div>
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
+
+
+{% endblock %}

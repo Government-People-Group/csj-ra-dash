@@ -1,0 +1,84 @@
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">
+  {{pageHeading}}
+</h1>
+
+<p class="govuk-body">The lead school is the main organisation and point of contact for training providers, placements and partner schools in the School Direct partnership.</p>
+
+<p class="govuk-body">The lead school you select will be able to view the trainee’s record.</p>
+
+{% set label = "Search for a school by its unique reference number (URN), name or postcode" %}
+
+{# Todo - this could probably be the default that the autocomplete progressively enhances #}
+<div class="app-no-js-only">
+  {{ govukInput({
+    id: "schoolSearch",
+    name: "_schoolSearch",
+    label: {
+      text: label
+    },
+    value: query._schoolSearch,
+    classes: 'app-!-max-width-two-thirds'
+  }) }}
+</div>
+
+<div class="app-js-only">
+  {{ appSchoolAutocomplete({
+    name: "_autocomplete_result_uuid",
+    value: (record.schools.leadSchool.schoolName | safe),
+    uuid: record.schools.leadSchool.uuid,
+    label: {
+      text: label
+    }
+  }) }}
+</div>
+
+{% set detailsHtml %}
+
+  <p class="govuk-body">
+    If the lead school is missing from the list, try searching for its unique reference number (URN) on <a href="#">Get information about schools (opens in a new tab)</a>.
+  </p>
+
+  <p class="govuk-body">
+    If you still cannot find the school, contact <a class="govuk-link" href="mailto:becomingateacher@digital.education.gov.uk">becomingateacher@digital.education.gov.uk</a>
+  </p>
+
+  <p class="govuk-body">You do not need to provide a lead school if the trainee is funded or employed privately.</p>
+
+  {{ govukCheckboxes({
+    items: [
+      {
+        value: "true",
+        text: "Lead school is not applicable"
+      }
+    ]
+    } | decorateAttributes(record, "record.schools.leadSchool.notApplicable")) }}
+{% endset %}
+
+{{ govukDetails({
+  summaryText: "Lead school is not listed, or the trainee is funded or employed privately",
+  html: detailsHtml,
+  open: true if record.schools.leadSchool.notApplicable == "true"
+}) }}
+
+{# Commented out for now as not sure about this #}
+{# Only show the checkbox where we're using the autocomplete and we've not already got results #}
+{# <div class="app-js-only">
+  Show a checkbox only if employing school isn’t already set and we’re on a route that has employing school
+  {% if record | requiresField("employingSchool") and not record.schools.employingSchool %}
+    No fieldset as this is a single checkbox item
+    {{ govukCheckboxes({
+      items: [
+        {
+          value: "true",
+          text: "This school is also the employing school"
+        }
+      ]
+    } | decorateAttributes(record, "record.schools.leadSchoolIsEmployingSchool")) }}
+  {% endif %}
+</div> #}
+
+
+{{ govukButton({
+  text: "Continue"
+}) }}

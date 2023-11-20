@@ -1,0 +1,170 @@
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+
+{% set defaultSelected = true %}
+{% if params.value %}
+  {% if params.value in params.items %}
+    {% set defaultSelected = false %}
+  {% endif %}
+{% endif %}
+
+{# First item should either be an empty row or an instruction #}
+{% if params.allowEmpty %}
+  {% set firstItem = {
+    vale: "",
+    text: "",
+    selected: defaultSelected
+  } %}
+{% else %}
+  {% set firstItem = {
+    value: "",
+    text: "Please select",
+    disabled: true,
+    selected: defaultSelected
+  } %}
+{% endif %}
+
+{% set selectItems = [firstItem] %}
+
+{# Support items in a few different formats #}
+{% for item in params.items %}
+  {% if item | isArray %}
+    {% set selectItems = selectItems | push({
+      value: item[1],
+      text: item[0],
+      selected: params.value == item[1]
+    }) %}
+  {% elseif item | isObject %}
+    {% set selectItems = selectItems | push({
+      text: item.text,
+      value: item.value,
+      selected: params.value == item.value
+    }) %}
+  {% else %}
+    {% set selectItems = selectItems | push({
+      value: item,
+      text: item,
+      selected: params.value == item
+    }) %}
+  {% endif %}
+{% endfor %}
+
+{# 
+This needs margin manually applied because the design system removes
+bottom margin from the last govuk-form-group in a div - which happens
+for *each* autocomplete 
+#}
+<div class="govuk-!-margin-bottom-6 {{params.classes}} ">
+  {{ govukSelect({
+    label: params.label,
+    hint: params.hint,
+    id: params.id,
+    classes: params.classes,
+    name: params.name,
+    items: selectItems,
+    errorMessage: params.errorMessage
+  }) }}
+</div>
+
+<script src="/public/javascripts/accessible-autocomplete.min.js"></script>
+<script>
+
+  // Support an alt set of values than the one provided by the select
+  // This is used where we want the autocomplete to have more advanced functionality
+  // Todo: this is messy! clean this up!
+  var values = false
+  {% if params.itemsAutocomplete %}
+    values = [
+    {% for value in params.itemsAutocomplete %}
+      {% if value | isArray %}
+        "{{ value[0] }}",
+      {% elseif value | isObject %}
+        "{{value.suggestion}}",
+      {% else %}
+      "{{value}}",
+      {% endif %}
+    {% endfor %}]
+  {% endif %}
+
+  var element = document.querySelector('#{{params.id}}');
+  // id = '{{params.id}}--autocomplete';
+  var defaultValue = '{{params.value}}';
+  var showAllValues = ('{{params.showAllValues}}' == 'false') ? false : true;
+  var autoSelect = ('{{params.autoSelect}}' == 'false') ? false : true;
+  var minLength = ('{{params.minLength}}' == false) ? 0 : parseInt('{{params.minLength}}');
+
+  // rawName used for cases where we need the *actual* value typed in the input, 
+  // not the value set by the auotcomplete js (eg setting the select). it starts 
+  // with an understore so that the kit auto-store data doesn’t capture it. Instead
+  // we need to grab it manually from req.body each time.
+  var rawName = '_autocompleteRawValue_{{params.id}}'
+
+  // Conditional not used
+  // confirmFunction = function(val) {
+  //   {% if params.conditional %}
+
+  //     if (val == 'Other'){
+  //       $('.{{params.idPrefix}}-conditional-container').removeClass("hidden")
+  //       console.log('removing hidden class')
+  //     }
+  //     else if (typeof(val) != 'undefined') {
+  //       $('.{{params.idPrefix}}-conditional-container').addClass("hidden")
+  //       console.log('adding hidden class')
+  //     }
+  //   {% endif %}
+  // }
+
+  var inputValue2 = (result) => {
+      if (result) {
+        const name = result.split(' | ')
+
+        if (name.length > 1) {
+          return name[0] && name[0]
+        }
+        return result && result
+      }
+      return result && result
+    }
+
+  var suggestion2 = (result) => {
+      const name = result.split(' | ')
+      if (name[1]) {
+        // Display second part in bold
+        if ('{{params.displayStyle}}' == 'bold'){
+          return name[0] &&  name[0] + '<span class="autocomplete__option--bold"> (' + name[1] + ')</span>'
+        }
+        // Display second part as hint on new line
+        else {
+          return name[0] && name[0] + '<span class="autocomplete__option-hint">' + name[1] + '</span>'
+        }
+      }
+      else {
+        return result && result
+      }
+      
+    }
+
+  accessibleAutocomplete.enhanceSelectElement({
+    selectElement: element,
+    showAllValues: showAllValues,
+    autoselect: autoSelect,
+    minLength: minLength,
+    ...(values ? { source: values } : {}), // conditionally pass values
+    defaultValue: defaultValue,
+    name: rawName,
+    templates: {
+      inputValue2,
+      suggestion2
+    }
+
+  });
+
+</script>
+
+{% if data.conditional %}
+  {# In case the autocomplete starts with 'Other' #}
+  {% set hiddenClass = 'hidden' if data.value != 'Other' else '' %}
+  {{ govukInsetText({
+    html: data.conditional,
+    classes: data.idPrefix + "-conditional-container app-inset-conditional " + hiddenClass
+  }) }}
+{% endif %}

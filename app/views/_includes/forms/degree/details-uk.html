@@ -1,0 +1,260 @@
+
+{% set bodyClasses = "app-has-invalid-answers" %}
+
+
+{% set formContent %}
+
+  {# Set up data #}
+  {% set degreeCount = record.degree.items | length %}
+  {% if degreeCount < 1 %}
+  {# {% if degreeCount < 1 and action == "add" %} #}
+    {# {% set ukHintText = "For example, BA, BSc or other (please specify)" %} #}
+    {% set ukHintText = "For example, BA or BSc" %}
+  {% else %}
+    {% set ukHintText = "For example, BA, BSc, Masters or PhD" %}
+  {% endif %}
+
+  {% set insetTextHtml %}
+    <p class="govuk-body">If this is not a UK degree you can change it to a <a href="./details?degreeTemp[isInternational]=true{{'' | addReferrer(referrer) }}" class="govuk-link">non-UK degree</a>.</p>
+  {% endset %}
+
+  {# Show toggle for non-UK degree if the insitution is invalid #}
+  {% if degreeTemp.institution | includes("**invalid**") %}
+    {{ govukInsetText({
+      html: insetTextHtml
+    }) }} 
+  {% endif %}
+
+  {% set changeDegreeTypeLink %}
+    <a href="./details?degreeTemp[isInternational]=true{{'' | addReferrer(referrer) }}" class="govuk-link">change to a non-UK degree</a>
+  {%- endset %}
+
+  {# {% set institutionNotRecognisedHtml %}
+    Search for the correct institution or {{changeDegreeTypeLink | safe}}.
+  {% endset %}
+ #}
+  {% set institutionNotRecognisedHtml %}, which was not recognised as a UK institution. Search for the correct institution or change to a non-UK degree.
+  {% endset %}
+
+  {% set degreeInstitutions = [] %}
+  {% for institution in data.degreeInstitutions %}
+    {% set degreeInstitutions = degreeInstitutions | push({
+      text: institution.name,
+      value: institution.name
+    }) %}
+  {% endfor %}
+
+  {# Degree institution #}
+  {{ appAutocompleteFromSelect({
+    label: {
+      text: "Awarding institution",
+      classes: "govuk-label--s"
+    },
+    id: 'degree-institutions',
+    name: "degreeTemp[institution]",
+    items: degreeInstitutions,
+    hint: {
+      text: "This may be different than where the trainee studied"
+    },
+    classes: "govuk-!-width-two-thirds",
+    value: degreeTemp.institution,
+    autocompleteOptions: {
+      minLength: 2,
+      autoselect: false,
+      showAllValues: false,
+      showSuggestionsBanner: true,
+      values: data.degreeInstitutions
+    }
+  } | highlightInvalidInputs({invalidMessage: institutionNotRecognisedHtml}) ) }}
+
+  {% set degreeHint %}
+    Choose from suggestions<span class="app-js-only"> or enter a new subject</span>
+  {% endset %}
+
+  {# Degree subject #}
+  {{ appAutocompleteFromSelect({
+    label: {
+      text: "Degree subject",
+      classes: "govuk-label--s"
+    },
+    hint: {
+      html: degreeHint
+    },
+    id: 'subject',
+    name: "degreeTemp[subject]",
+    items: data.subjects | toSelectItems,
+    classes: "govuk-!-width-two-thirds",
+    value: degreeTemp.subject,
+    autocompleteOptions: {
+      autoselect: false,
+      showAllValues: false,
+      minLength: 2,
+      showSuggestionsBanner: true
+    }
+  } | highlightInvalidInputs ) }}
+
+{#   <div class="govuk-form-group">
+    {{ govukButton({
+      text: "Add another subject",
+      classes: "govuk-button--secondary govuk-!-margin-bottom-1",
+      href: "#"
+    }) }}
+  </div> #}
+
+  {# Degree types #}
+  {% set degreeTypesAutocomplete = data.degreeTypes | getDegreeTypesForAutocomplete | sort(attribute='value') %}
+
+  {{ appAutocompleteFromSelect({
+    label: {
+      text: "Type of degree",
+      classes: "govuk-label--s"
+    },
+    hint: {
+      text: ukHintText
+    },
+    id: 'degreeTypeUK',
+    name: "degreeTemp[typeUK]",
+    items: data.degreeTypesSimple | toSelectItems,
+    classes: "govuk-!-width-two-thirds",
+    value: (degreeTemp.type or degreeTemp.typeUK) if not isInternational,
+    autocompleteOptions: {
+      minLength: 2,
+      autoselect: false,
+      showSuggestionsBanner: true,
+      values: degreeTypesAutocomplete
+    }
+  } | highlightInvalidInputs ) }}
+
+  {# Degree grade #}
+  {% set storedGrade = degreeTemp.grade %}
+
+  {# Do some acrobatics to work out if the 'other' radio should be selected #}
+  {% set storedGradeOther = false %}
+
+  {% if storedGrade and not storedGrade in [
+    "First-class honours",
+    "Upper second-class honours (2:1)",
+    "Lower second-class honours (2:2)",
+    "Third-class honours",
+    "Pass",
+    "Merit",
+    "Distinction"
+  ] %}
+    {% set storedGradeOther = true %}
+  {% endif %}
+
+  {% set degreeGradeOtherHtml %}
+
+    {# Degree types #}
+    {% set degreeGradesAutocomplete = data.degreeGrades.all | getDegreeGradesForAutocomplete | sort(attribute='value') %}
+
+{#     {{ govukInput({
+      label: {
+        text: "Enter the degree grade"
+      },
+      id: "degree-start-date",
+      classes: "app-!-max-width-one-half",
+      name: "degreeTemp[otherGrade]",
+      value: degreeTemp.grade if storedGradeOther
+    } | decorateAttributes(degreeTemp, "degreeTemp.grade"))}} #}
+
+
+    {{ appAutocompleteFromInput({
+      label: {
+        text: "Enter the degree grade",
+        _classes: "govuk-label--s"
+      },
+      _hint: {
+        text: "none"
+      },
+      id: 'degree-grade',
+      name: "degreeTemp[otherGrade]",
+      classes: "govuk-!-width-one-half",
+      value: degreeTemp.grade if storedGradeOther,
+      autocompleteOptions: {
+        minLength: 2,
+        autoselect: false,
+        showSuggestionsBanner: true,
+        values: degreeGradesAutocomplete
+      }
+    })}}
+  {% endset %}
+
+  {{ govukRadios({
+    fieldset: {
+      legend: {
+        text: "Degree grade",
+        classes: "govuk-fieldset__legend--s"
+      }
+    },
+    name: "degreeTemp[baseGrade]",
+    hint: {
+      text: ""
+    },
+    items: [
+      {
+        text: "First-class honours"
+      },
+      {
+        text: "Upper second-class honours (2:1)"
+      },
+      {
+        text: "Lower second-class honours (2:2)"
+      },
+      {
+        text: "Third-class honours"
+      },
+      {
+        text: "Pass"
+      },
+      {
+        text: "Distinction"
+      },
+      {
+        text: "Merit"
+      },
+      {
+        divider: "or"
+      },
+      {
+        text: "Other",
+        checked: storedGradeOther,
+        conditional: {
+          html: degreeGradeOtherHtml
+        }
+      }
+    ]
+  } | decorateAttributes(degreeTemp, "degreeTemp.grade")) }}
+
+  {# Graduation year #}
+  {{ govukInput({
+    label: {
+      text: "Graduation year",
+      classes: "govuk-label--s"
+    },
+    id: "graduation-year",
+    name: "degreeTemp[endDate]",
+    value: degreeTemp.endDate,
+    classes: "app-!-max-width-one-quarter"
+  }) }}
+{% endset %}
+
+{% set hasInvalidAnswers = degreeTemp | hasInvalidAnswers and data.settings.highlightInvalidAnswers | falsify %}
+
+
+{% if hasInvalidAnswers %}
+  {% set invalidAnswerType = "degree" %}
+  {% include "_includes/invalidAnswersBanner.njk" %}
+{% endif %}
+
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">
+  {{pageHeading}}
+</h1>
+
+{{ formContent | safe }}
+
+
+{{ govukButton({
+  text: "Continue"
+}) }}

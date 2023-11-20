@@ -1,0 +1,221 @@
+
+{# Variable to keep track of how many unmapped items we have - as we only want to render the 
+first umampped subject #}
+{% set countOfUnmapped = 0 %}
+
+{# Loop through each subject in the publish subjects #}
+{% for ordinal, subject in record.courseDetails.publishSubjects %}
+
+  {# Publish subjects are stored against an ordinal `first` or `second` #}
+  {% set ordinal = loop.index | getOrdinalName %}
+
+  {#
+  Hacky handling for case where a course is 2 languages and a non-language.
+  normally we check that for each publish subject we have a corresponding subject specialism in the
+  same ordinal slot - so if the first Publish subject is biology, is the first specialism set?.
+  However for languages, they might have picked 2 langauges - so the missing specialism for the
+  non-language is actually in the third slot.
+   #}
+  {% if ordinal == 'second' and record.courseDetails.publishSubjects.first == "Modern languages" and record.courseDetails.third == null %}
+    {# Swap to 'third' as this is where we should be storing the non-language subject specialism #}
+    {% set ordinal = 'third' %}
+  {% endif %}
+
+  {# Does the publish subject map to a specialism? #}
+  {% set subjectMappable = subject | publishSubjectMapsToSpecialism %}
+
+  {# Do we already have a specialism set for this subject? #}
+  {% set ordinalSpecialismIsSet = record.courseDetails.subjects[ordinal] | falsify %}
+  {% set ordinalSpecialismIsMissing = not ordinalSpecialismIsSet %}
+
+  {# 
+  For the *first* unmappable subject we come across, show inputs to collect
+  the mapping.
+
+  After this gets set, we’ll loop through this whole page again to collect any more
+  unmappable subjects
+  #}
+
+  {# Render an input only if we don't have a specialism already - and only the first one #}
+  {% if not subjectMappable and ordinalSpecialismIsMissing and countOfUnmapped < 1 %}
+
+    {# So that we can make sure not to loop through this again #}
+    {% set countOfUnmapped = countOfUnmapped + 1 %}
+
+    {% set items = [] %}
+
+    {# Should only contain modern languages #}
+    {% set possibleSpecialisms = subject | publishSubjectToPossibleSpecialisms | sort %}
+
+    {% set possibleSpecialismsShortened = [] %}
+
+    {# Special handling for languages, where the ui is different. Rather than radios, users can pick multiple languages #}
+    {% if subject == "Modern languages" %}
+
+      {# Make a subjects array for use in the autocomplete #}
+      {% set subjectsForAutocomplete = [] %}
+      {% for specialism in possibleSpecialisms %}
+
+        {# Strip out 'language' from languages - eg Spanish language => Spanish. But don’t touch
+        those that are plural - eg Chinese languages #}
+        {% set shortenedSubject = specialism | replace("languages", "_lang") | replace(" language", "") | replace("_lang", "languages") %}
+
+        {% set possibleSpecialismsShortened = possibleSpecialismsShortened | push(shortenedSubject) %}
+        
+
+        {# {% set items = items | push({
+          text: shortenedSubject,
+          value: specialism
+        }) %} #}
+        {% set allocationSubject = specialism | subjectToAllocationSubject %}
+        {% set subjectsForAutocomplete = subjectsForAutocomplete | push({
+          name: shortenedSubject,
+          value: specialism,
+          synonyms: [allocationSubject]
+        }) %}
+
+      {% endfor %}
+
+      {# 2 or 3 language inputs #}
+      {% set multipleSubjectsHtml %}
+        
+        {# <p class="govuk-body">The first subject is the main one. It represents the bursary or scholarship available if applicable.</p> #}
+
+        {% set maxLanguages = 3 if (record.courseDetails.publishSubjects | length == 1)  %}
+
+        {# Vary the number of autocompletes based on how many languages we have space for #}
+        {% if maxLanguages == 3 %}
+          {% set languageIterator = [1,2,3] %}
+        {% else %}
+          {% set languageIterator = [1,2] %}
+        {% endif %}
+
+        {% for item in languageIterator %}
+
+          {% set label %}
+            {# First language, second language, etc. Show optional for second and third languages #}
+            {# Show '(optional)' if it’s a secondary course or if it’s primary but the third subject #}
+            {{ item | getOrdinalName | sentenceCase }} language {{ "(optional)" if not loop.first }}
+          {% endset %}
+
+          {# {{ appAutocompleteFromSelect({
+            label: {
+              text: label,
+              classes: "govuk-label--s"
+            },
+            hint: {
+              text: 'Search for the ' + ( item | getOrdinalName ) + ' language'
+            },
+            id: 'subject_' + (loop.index + 1),
+            classes: "govuk-!-width-two-thirds",
+            name: "record[courseDetails][subjectsArrayTemp]",
+            items: possibleSpecialisms | toSelectItems,
+            autocompleteOptions: {
+              autoselect: true,
+              showAllValues: false,
+              allowEmpty: true,
+              values: subjectsForAutocomplete
+            }
+          }
+          ) }} #}
+
+          {{ govukSelect({
+            id: 'subject_' + (loop.index + 1),
+            name: "record[courseDetails][subjectsArrayTemp]",
+            label: {
+              text: label,
+              classes: "govuk-label--s"
+            },
+            items: possibleSpecialismsShortened | toSelectItems(true, true)
+          }) }}
+        {% endfor %}
+      {% endset %}
+
+      {% set legendText %}
+        Which languages has the trainee chosen to study?
+      {% endset %}
+
+      {# Dynamic hint text depending on if the course includes non language subjects #}
+      {# They can select as many languages as they like up to the specialisms limit. If the Publish
+      course only has languages, that means they can pick 3 languages total. 
+      If it also has another subject (eg biology with modern languages), they can pick 2 languages in addition to the other subject. In practice courses don't seem to be listed
+      with languages combined with a non language subject. The exception is "Primary with modern languages" #}
+      {% set hintText %}
+
+        {# <p class="govuk-body">These language specialisms are recorded on the trainee’s QTS award.</p> #}
+        <p class="govuk-body">
+
+          {# In nearly all cases modern languages is on its own #}
+          {% if record.courseDetails.publishSubjects | length == 1 -%}
+            
+          {%- else %}
+            {# Get the opposite subject to the current one - if this one is first, the other is second
+            if this one is second, the other is first #}
+            {% set subjectName %}
+              {# Defer to specialism name (if set) otherwise publish name #}
+              {% if ordinal == 'first' %}
+                {{ (record.courseDetails.subjects.second or record.courseDetails.publishSubjects.second) }}
+              {% else %}
+                {{ (record.courseDetails.subjects.first or record.courseDetails.publishSubjects.first) }}
+              {% endif %}
+            {% endset %}
+            Choose the languages the trainee will study with {{ subjectName | trim | dynamicLowercase}}.
+          {%- endif %}
+
+        </p>
+      {% endset %}
+
+      {% include "_includes/trainee-name-caption.njk" %}
+      <h1 class="govuk-heading-l">Which modern languages will the trainee study?</h1>
+      {{ hintText | safe }}
+
+      {{ multipleSubjectsHtml | safe }}
+
+    {% else %}
+
+      {# Sort the specialism to the top of the array #}
+      {# Eg In a list of all the design and technology specialisms, the specialism of design and technology will be first. #}
+      {% if possibleSpecialisms | includes(subject) %}
+        {% set possibleSpecialisms = possibleSpecialisms | removeArrayItem(subject) %}
+
+        {% set items = items | push({
+          text: subject
+        }) %}
+
+      {% endif %}
+
+      {# All unmappable subjects except languages #}
+      {% for specialism in possibleSpecialisms %}
+        {% set items = items | push({
+          text: specialism
+        }) %}
+      {% endfor %}
+
+      {% set legendText %}
+        Which {{subject | dynamicLowercase }} specialism has the trainee chosen to study?
+        {# {{ 'will the trainee study?' if record | isDraft else "is the trainee studying?" }} #}
+      {% endset %}
+
+      {{ govukRadios({
+        fieldset: {
+          legend: {
+            text: legendText,
+            isPageHeading: true,
+            classes: "govuk-fieldset__legend--l"
+          }
+        },
+        hint: {
+          text: "This specialism is what is recorded on the trainee’s QTS award."
+        },
+        idPrefix: 'record-courseDetails-subjects-' + loop.index0,
+        items: items
+      } | decorateAttributes(record, "record.courseDetails.subjects[" + ordinal + "]")) }}
+        
+    {% endif %}
+
+  {% endif %}
+{% endfor %}
+
+{{ govukButton({
+  text: "Continue"
+}) }}

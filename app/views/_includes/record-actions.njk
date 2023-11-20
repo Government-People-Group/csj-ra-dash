@@ -1,0 +1,201 @@
+
+{% set deferUrl %}
+  {% if record | isHesaAndLocked %}
+    {{ referrer + "/hesa-warning" | addReferrer(referrer) }}
+  {% elseif (record | ittInTheFuture) %}
+    {{ referrer + "/defer/confirm" | addReferrer(referrer) }}
+  {% elseif (record | ittStartedButNoCommencementDate) %}
+    {{ referrer + "/defer/did-trainee-start" | addReferrer(referrer) }}
+  {% else %}
+    {{ referrer + "/defer" | addReferrer(referrer) }}
+  {% endif %}
+{% endset %}
+
+{% set reinstateUrl %}
+  {% if record | isHesaAndLocked %}
+    {{ referrer + "/hesa-warning" | addReferrer(referrer) }}
+  {% elseif (record | ittInTheFuture) %}
+    {{ referrer + "/reinstate/confirm" }}
+  {% else %}
+    {{ referrer + "/reinstate" }}
+  {% endif %}
+{% endset %}
+
+{% set withdrawUrl %}
+  {% if (record | ittStartedButNoCommencementDate) %}
+    {{ referrer + "/withdraw/did-trainee-start" | addReferrer(referrer) }}
+  {% else %}
+    {{ referrer + "/withdraw" | addReferrer(referrer) }}
+  {% endif %}
+{% endset %}
+
+{% set removeUrl %}
+  {% if record | ittStartedButNoCommencementDate %}
+    {{ referrer + "/remove/did-trainee-start" | addReferrer(referrer) }}
+  {% else %}
+    {{ referrer + "/remove/confirm" | addReferrer(referrer) }}
+  {% endif %}
+{% endset %}
+
+{% set combinedRemoveUrl %}
+  {{ referrer + "/remove/reason" | addReferrer(referrer) }}
+{% endset %}
+
+{% set actionItems = [] %}
+
+{% if data.settings.useCombinedRemoveFlow == 'false' %}
+  {# Remove record #}
+  {% if not record.trainingDetails.commencementDate and not record | isHesaAndLocked %}
+    {% set actionItems = actionItems | push(['remove', removeUrl]) %}
+  {% endif %}
+{% endif %}
+
+{# Did not start #}
+{# {% if record | isNotDeferred and not record.trainingDetails.commencementDate %}
+  {% set actionItems = actionItems | push(['did not start', removeUrl]) %}
+{% endif %} #}
+
+{# Defer #}
+{% if not record | isDeferred %}
+  {% set actionItems = actionItems | push(['defer', deferUrl]) %}
+{% endif %}
+
+{# Reinstate #}
+{% if record | isDeferred %}
+  {% set actionItems = actionItems | push(['reinstate', reinstateUrl]) %}
+{% endif %}
+
+{% if data.settings.useCombinedRemoveFlow == 'false' %}
+  {# Withdraw #}
+  {% if not record | ittInTheFuture %}
+    {% set actionItems = actionItems | push(['withdraw', withdrawUrl]) %}
+  {% endif %}
+{% endif %}
+
+{% if data.settings.useCombinedRemoveFlow == 'true' %}
+  {% set actionItems = actionItems | push(['remove', combinedRemoveUrl]) %}
+{% endif %}
+
+
+{% set actionLinksHtml = [] %}
+
+{% for item in actionItems -%}
+  {% set linkHtml -%}<a href="{{ item[1] }}">{{ (item[0] | sentenceCase ) if loop.first else item[0] }}</a>
+  {%- endset %}
+  {% set actionLinksHtml = actionLinksHtml | push(linkHtml) %}
+{%- endfor %}
+
+{% set actionSentenceHtml %}
+  <p class="govuk-body">{{actionLinksHtml | orSeparate | safe }} this trainee</p>
+{% endset %}
+
+{# {% set buttonMenuItems = [] %} #}
+
+{# {% if (record | isDeferred ) and record.trainingDetails.commencementDate %}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Reinstate", href: reinstateUrl, classes: "govuk-button--secondary" }
+  ) -%}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Withdraw", href: withdrawUrl, classes: "govuk-button--secondary" }
+  ) -%}
+{% elseif (record | isDeferred ) and not record.trainingDetails.commencementDate %}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Reinstate", href: reinstateUrl, classes: "govuk-button--secondary" }
+  ) -%}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Remove record", href: removeUrl, classes: "govuk-button--secondary" }
+  ) -%}
+{% elseif (record | ittInTheFuture) %}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Did not start", href: removeUrl, classes: "govuk-button--secondary" }
+  ) -%}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Defer", href: deferUrl, classes: "govuk-button--secondary" }
+  ) -%}
+{% elseif (record | ittStartedButNoCommencementDate) %}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Did not start", href: removeUrl, classes: "govuk-button--secondary" }
+  ) -%}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Defer", href: deferUrl, classes: "govuk-button--secondary" }
+  ) -%}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Withdraw", href: withdrawUrl, classes: "govuk-button--secondary" }
+  ) -%}
+{% elseif (record | traineeStarted) %}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Defer", href: deferUrl, classes: "govuk-button--secondary" }
+  ) -%}
+  {%- set buttonMenuItems = buttonMenuItems | push(
+    { text: "Withdraw", href: withdrawUrl, classes: "govuk-button--secondary" }
+  ) -%}
+{% endif %} #}
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full record-actions">
+
+    <div class="govuk-button-group govuk-!-margin-bottom-0">
+      {% if record.status | canRecommendForQts %}
+        {% if record | ittInTheFuture %}
+          {{ govukInsetText({
+          text: "The trainee’s ITT starts on " + (record.courseDetails.startDate | govukDate),
+          classes: "govuk-!-margin-0"
+        }) }}
+        {% elseif record | hasOutstandingActions %}
+          {{ govukInsetText({
+            text: "This trainee record requires additional details",
+            classes: "govuk-!-margin-0"
+          }) }}
+        {% else %}
+          {{ govukButton({
+            text: "Recommend trainee for " + (record | getQualificationText),
+            href: referrer + '/qualification/outcome-date',
+            classes: ""
+          }) }}
+        {% endif %}
+      {% elseif record.status == "Pending TRN" %}
+        {{ govukInsetText({
+          text: "This trainee is pending a TRN",
+          classes: "govuk-!-margin-0"
+        }) }}
+      {% elseif record.status == "Deferred" %}
+        {{ govukInsetText({
+          text: "This trainee is deferred",
+          classes: "govuk-!-margin-0"
+        }) }}
+      {% endif %}
+
+
+      {% if not canAmend %}
+        {% if record | sourceIsHESA and record.hesa.editingEnabled != true %}
+          {{ govukButton({
+            text: "Enable editing for trainee",
+            classes: "govuk-button--secondary",
+            href: recordPath + "/toggle-editing"
+          }) }}
+        {% endif %}
+      {% endif %}
+      
+
+    </div>
+
+  {# Only show action links where a record isn't final #}
+  {% if record | isActiveStatus %}
+    <div class="">
+      {{ actionSentenceHtml | safe}}
+      {# {{ mojButtonMenu({
+        items: buttonMenuItems
+      }) }} #}
+    </div>
+  {% endif %}
+
+  </div>
+</div>
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-full">
+    <hr class="govuk-section-break govuk-!-margin-top-s govuk-!-margin-bottom-3 govuk-section-break--visible">
+  </div>
+</div>

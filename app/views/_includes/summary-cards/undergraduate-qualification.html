@@ -1,0 +1,67 @@
+{% set undergraduateQualification %}
+  {% if record.undergraduateQualification.type == "Other qualification" %}
+    {{record.undergraduateQualification.typeOther}}
+  {% else%}
+    {{record.undergraduateQualification.type}}
+  {% endif %}
+{% endset %}
+
+{% set undergraduateQualificationRow = {
+  key: {
+    text: "Highest qualification"
+  },
+  value: {
+    text: undergraduateQualification
+  },
+  actions: {
+      items: [
+        {
+          href: recordPath + "/undergraduate-qualification" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: "qualification"
+        }
+      ]
+    } if canAmend
+} %}
+
+{% set undergraduateQualificationRows = [
+  undergraduateQualificationRow
+] %}
+
+{% set undergraduateQualificationDetailsHtml %}
+  {{ govukSummaryList({
+      rows: undergraduateQualificationRows
+  }) }}
+{% endset %}
+
+{% set complete = record.undergraduateQualification | sectionIsComplete %}
+{% set status  = record.undergraduateQualification | getStatusText %}
+{% set sectionIsRequired = record | requiresSection("undergraduateQualification") %}
+
+{% if not sectionIsRequired %}
+  {# Section not required #}
+{% elseif showIncomplete and not complete %}
+
+  {% set incompleteType = "warning" if errorList %}
+  {% set incompleteId = "undergraduateQualification" %}
+  {% if status == "In progress" %}
+    {% set incompleteText = "Qualification on entry not marked as complete" %}
+    {% set incompleteLink = recordPath + "/undergraduate-qualification/confirm" %}
+    {% set incompleteLinkText = "Continue section" %}
+  {% else %}
+    {% set incompleteText = "Qualification on entry not started" %}
+    {% set incompleteLink = recordPath + "/undergraduate-qualification" %}
+    {% set incompleteLinkText = "Start section" %}
+  {% endif %}
+
+  {% include "_includes/incomplete.njk" %}
+
+{% else %}
+
+  {{ appSummaryCard({
+    classes: "govuk-!-margin-bottom-6",
+    titleText: "Qualification on entry details",
+    html: undergraduateQualificationDetailsHtml
+  }) }}
+  
+{% endif %}

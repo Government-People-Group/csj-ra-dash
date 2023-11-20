@@ -1,0 +1,208 @@
+
+{# All routes have initiatives #}
+{% set initiativeRow = {
+  key: {
+    text: "Training initiative"
+  },
+  value: {
+    text: record.funding.initiative or "Not provided"
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/funding/initiatives" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "training initiative"
+      }
+    ]
+  } if canAmend
+} %}
+
+{# Bursaries #}
+
+{% set fundingSource = record.funding.source %}
+{% set scholarshipsApply = record | scholarshipsApply %}
+{% set financialSupport = record | getFinancialSupport %}
+
+{% set courseFundingHtml %}
+  {% if fundingSource == 'self-funded' and scholarshipsApply %}
+    Not bursary or scholarship funded
+  {% elseif fundingSource == 'self-funded' and financialSupport.type =='grant' %}
+    Not grant funded
+  {% elseif fundingSource == 'self-funded' %}
+    Not bursary funded
+  {% elseif fundingSource == 'grant' %}
+    Grant applied for
+    <p class="govuk-hint">
+      {{record | getFinancialSupportValue | currency }} estimated grant
+    </p>
+  {% elseif fundingSource == 'scholarship' %}
+    Scholarship applied for
+    <p class="govuk-hint">
+      {{record | getScholarshipValue | currency }} estimated scholarship
+    </p>
+  {% elseif fundingSource == 'bursary' %}
+    Bursary applied for
+    <p class="govuk-hint">
+      {{record | getFinancialSupportValue | currency }} estimated bursary
+    </p>
+  {# Anything remaining is an Early Years tiered bursary #}
+  {% elseif fundingSource %}
+    {# Do a little dance to look up the tier name #}
+    {# Really we should be storing the actual bursary or level against the trainee  #}
+    {% set bursaryData = record | getFinancialSupport %}
+    {% set bursaryTier = bursaryData.tiers | where('name', fundingSource ) | first %}
+    Applied for {{bursaryTier.name}}
+    <p class="govuk-hint">{{bursaryTier.value | currency }} estimated bursary</p>
+  {% endif %}
+{% endset %}
+
+{% if record | financialSupportApplies %}
+
+  {% set courseFundingRow = {
+    key: {
+      text: "Funding method"
+    },
+    value: {
+      text: courseFundingHtml | safe | trim
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/funding/financial-support" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: "funding method details"
+        }
+      ]
+    } if canAmend
+  } %}
+
+{% else %}
+
+  {% if showBursaryRow %}
+    {# Only show course funding row for submitted records - confusing to see it on drafts #}
+    {% set courseFundingRow = {
+      key: {
+        text: "Funding method"
+      },
+      value: {
+        text: "Not applicable for this course"
+      }
+    }
+     %}
+   {% else %}
+     {% set courseFundingRow = false %}
+  {% endif %}
+
+
+{% endif %}
+
+
+{# {% set degrees = record.degree.items %}
+{% set degreeCount = degrees | length %}
+{% set degreesRequired = record | requiresSection("degree") %}
+
+{% if degreeCount > 1 %}
+
+  {% set bursaryDegree = record.degree.items | find('id', record.degree.degreeToBeUsedForBursaries) %}
+
+  {% if bursaryDegree %}
+    {% set bursaryHtml %}
+      <p class="govuk-body">{{ bursaryDegree | getDegreeName }}</p>
+      <div class="govuk-hint">{{ bursaryDegree | getDegreeHint }}</div>
+    {% endset %}
+  {% elseif record.degree.degreeToBeUsedForBursaries %}
+    {% set bursaryHtml = "Not provided" %}
+  {% endif %}
+
+  {% set bursaryDegreeRow = {
+    key: {
+      text: "Degree that relates to awarded bursary"
+    },
+    value: {
+      html: bursaryHtml or "Not provided"
+    },
+    actions: {
+      items: [
+        {
+          href: recordPath + "/degree/bursary-selection" | addReferrer(referrer),
+          text: "Change",
+          visuallyHiddenText: "address"
+        }
+      ]
+    } if canAmend
+  }
+  %}
+
+{% endif %} #}
+
+
+{% set fundingRows = [
+  initiativeRow,
+  courseFundingRow
+] %}
+
+{#   bursaryValueRow if routeHasFinancialSupport and not isSelfFunded,
+  bursaryDegreeRow if (routeHasFinancialSupport and not isSelfFunded and bursaryDegreeRow) #}
+
+{% set fundingHtml %}
+  {{ govukSummaryList({
+    rows: fundingRows | highlightInvalidRows({
+      treatEmptyAsMissing: true
+    })
+  }) }}
+{% endset %}
+
+
+
+{% set complete = record.funding | sectionIsComplete %}
+{% set status  = record.funding | getStatusText %}
+{% set sectionIsRequired = record | requiresSection("funding") %}
+
+{% if not sectionIsRequired %}
+  {# Section not required #}
+{% elseif showIncomplete and not complete %}
+
+  {% if record | canStartFundingSection %}
+    {% set incompleteType = "warning" if errorList %}
+    {% set incompleteId = "funding" %}
+    {% if status == "In progress" %}
+      {% set incompleteText = "Funding section not marked as complete" %}
+      {% set incompleteLink = recordPath + "/funding/confirm" %}
+      {% set incompleteLinkText = "Continue section" %}
+    {% else %}
+      {% set incompleteText = "Funding section not started" %}
+      {% set incompleteLink = recordPath + "/funding" %}
+      {% set incompleteLinkText = "Start section" %}
+    {% endif %}
+
+  {% include "_includes/incomplete.njk" %}
+
+  {% else %}
+
+    {% set bannerHtml %}
+      <p class="govuk-body" id="missing-{{ incompleteId }}">Funding section cannot be started yet</p>
+      <div class="govuk-body govuk-hint">Complete course details first</div>
+    {% endset %}
+
+    {{ appBanner({
+      classes: "app-banner--missing-section",
+      html: bannerHtml,
+      type: "information",
+      icon: false
+    }) }}
+
+      
+  {% endif %}
+
+
+
+{% else %}
+
+  {{ appSummaryCard({
+    classes: "govuk-!-margin-bottom-6",
+    titleText: "Funding",
+    html: fundingHtml
+  }) }}
+
+{% endif %}

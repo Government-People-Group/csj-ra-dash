@@ -1,0 +1,356 @@
+{% set provider = record.provider | getProviderData %}
+
+{% set providerText %}
+  {% if record.provider %}
+    {{record.provider | safe}} ({{provider.providerCode or "C23"}})
+  {% else %}
+    Not provided
+  {% endif %}
+{% endset %}
+
+
+{% set providerRow = {
+  key: {
+    text: "Accredited provider"
+  },
+  value: {
+    text: providerText
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/accredited-provider/change" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "accredited provider"
+      }
+    ]
+  } if canAmend and data.isAdmin
+} %}
+
+{% set sourceText %}
+  {% if record.source == "Manual" %}
+    Added manually
+  {% elseif record.source %}
+    {{ record.source }}
+  {% else %}
+    Not provided
+  {% endif %}
+{% endset %}
+
+{% set recordSourceRow = {
+  key: {
+    text: "Record source"
+  },
+  value: {
+    text: sourceText
+  }
+} %}
+
+{% set trnRow = {
+  key: {
+    text: "TRN"
+  },
+  value: {
+    text: record.trn or 'Not provided'
+  }
+} %}
+
+{% set hesaRow = {
+  key: {
+    text: "HESA ID"
+  },
+  value: {
+    text: record.hesa.id or 'Not provided'
+  }
+} %}
+
+{% set regionRow = {
+  key: {
+    text: "Region"
+  },
+  value: {
+    text: "South East"
+  }
+} %}
+
+{% set referenceRow = {
+  key: {
+    text: "Reference"
+  },
+  value: {
+    text: record.reference or 'Not provided',
+    html: referenceHtml
+  }
+} %}
+
+
+{% set traineeIdRow = {
+  key: {
+    text: "Provider trainee ID"
+  },
+  value: {
+    text: record.trainingDetails.traineeId or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/trainee-id" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "provider trainee ID"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set startYearRow = {
+  key: {
+    text: "Start year"
+  },
+  value: {
+    text: record.academicYear or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/training-year" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "start year"
+      }
+    ]
+  } if canAmend and false
+} %}
+
+{% set endYearRow = {
+  key: {
+    text: "End year"
+  },
+  value: {
+    text: record.endAcademicYear or 'Not provided'
+  }
+} %}
+
+{% set submittedDateHtml %}
+  <p class="govuk-body">{{record.submittedDate | govukDate}}</p>
+  <div class="govuk-hint">{{record.submittedDate | formatDate('relative')}}</div>
+{% endset %}
+
+{% set pendingTrnRow = {
+  key: {
+    text: "Submitted for TRN"
+  },
+  value: {
+    html: submittedDateHtml | safe
+  }
+} %}
+
+
+
+{% set recommendedForAwardContentHtml %}
+  {{govukTag({
+    text: (record | getQualificationText) + " recommended",
+    classes: record.status | getStatusClass + " govuk-!-margin-bottom-2"
+  })}} <br>
+  {% if record.qualificationDetails.outcomeDate %}
+    Recommended: {{record.qualificationDetails.outcomeDate | govukDate}}
+  {% endif %}
+{% endset %}
+
+{% set recommendedForAwardRow = {
+  key: {
+    text: (record | getQualificationText)
+  },
+  value: {
+    html: recommendedForAwardContentHtml
+  }
+} %}
+
+{% set awardContentHtml %}
+  {{govukTag({
+    text: (record | getQualificationText) + " awarded",
+    classes: record.status | getStatusClass + " govuk-!-margin-bottom-2"
+  })}} <br>
+  Awarded: {{record.qualificationAwardedDate | govukDate}}
+{% endset %}
+
+{% set awardRow = {
+  key: {
+    text: (record | getQualificationText)
+  },
+  value: {
+    html: awardContentHtml
+  }
+} %}
+
+{% set academicOutcomeRow = {
+  key: {
+    text: "Qualification with " + record | getQualificationText
+  },
+  value: {
+    text: record.outcome.academicQualification | getAcademicQualificationText
+  }
+} %}
+
+{% set deferredContentHtml %}
+  {{govukTag({
+    text: "Deferred",
+    classes: record.status | getStatusClass + " govuk-!-margin-bottom-2"
+  })}} <br>
+  {% if record.deferredDate %}
+    Deferral date: {{record.deferredDate | govukDate}}
+  {% else %}
+    The trainee deferred before starting their ITT
+  {% endif %}
+{% endset %}
+
+{% set deferredRow = {
+  key: {
+    text: "Trainee status"
+  },
+  value: {
+    html: deferredContentHtml
+  }
+} %}
+
+
+{% set withdrawalContentHtml %}
+  {{govukTag({
+    text: "Withdrawn",
+    classes: record.status | getStatusClass
+  })}} <br>
+  <p class="govuk-body">Withdrawal date: {{record.withdraw.date | govukDate}}</p>
+{% endset %}
+
+{% set withdrawnRow = {
+  key: {
+    text: "Trainee status"
+  },
+  value: {
+    html: withdrawalContentHtml
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/training-year" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "start year"
+      }
+    ]
+  }
+} %}
+
+{# {% set previousQtsOutcome %}
+  {% if record.previousQtsOutcome == "For another reason" %}
+    {{record.previousQtsOutcomeOther}}
+  {% else %}
+    {{record.previousQtsOutcome}}
+  {% endif %}
+{% endset %}
+
+{% set qtsRowText %}
+    {% if record.status == "QTS recommended" %}
+      Previous QTS outcome
+    {% else %}
+      QTS outcome
+    {% endif %}
+{% endset %}
+
+{% if record.qtsNotPassedOutcomeDate | length %}
+  {% set qtsOutcomeContent %}
+      Not recommended: {{previousQtsOutcome}}
+  {% endset %}
+
+  {% set studentRecordRows = studentRecordRows | push({
+    key: {
+      text: qtsRowText
+    },
+    value: {
+      html: qtsOutcomeContent
+    }
+  }) %}
+{% endif %} #}
+
+{% set updatedDateHtml %}
+  <p class="govuk-body">{{record.updatedDate | govukDate or 'Not provided'}}</p>
+  {% if record.updatedDate | isInLast( 7, 'days') %}
+    <div class="govuk-hint">{{ record.updatedDate | formatDate('relative') }}</div>
+  {% endif %}
+{% endset %}
+
+{% set updatedDateRow = {
+  key: {
+    text: "Last updated"
+  },
+  value: {
+    html: updatedDateHtml
+  }
+} %}
+
+{% set recordCreatedRow = {
+  key: {
+    text: "Record created"
+  },
+  value: {
+    text: record.submittedDate | govukDate or 'Not provided'
+  }
+} %}
+
+{% set traineeStarted = (record.trainingDetails.commencementDate | length > 1) or record.trainingDetails.traineeStarted | falsify %}
+
+{% set commencementDateLabel %}
+  {% if record.courseDetails.startDate | isInFuture %}
+    {{ "ITT has not started" }}
+  {% elseif record.trainingDetails.commencementDate %}
+    {{ record.trainingDetails.commencementDate | govukDate }}
+  {% elseif record.trainingDetails.traineeStarted == "trainee-not-started" %}
+    Trainee has not started yet
+  {% endif %}
+{% endset %}
+
+{% set traineeStartDateRow = {
+  key: {
+    text: "Trainee start date"
+  },
+  value: {
+    text: commencementDateLabel
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/trainee-start-date" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "trainee start date"
+      }
+    ]
+  } if canAmend and record.courseDetails.startDate | isInPast and not record | isDeferred
+} %}
+
+{% set traineeProgressRows = [
+  providerRow if data.isAdmin or data.settings.userProviders | length > 1,
+  recordSourceRow if data.isAdmin,
+  trnRow if record.trn,
+  hesaRow if record | sourceIsHESA,
+  referenceRow,
+  traineeIdRow,
+  regionRow if record | requiresField("region"),
+  pendingTrnRow if record | isPendingTrn,
+  recordCreatedRow,
+  updatedDateRow,
+   startYearRow,
+  endYearRow,
+  traineeStartDateRow
+] | removeEmpty %}
+
+{% set traineeProgressHtml %}
+  {{ govukSummaryList({
+    rows: traineeProgressRows | highlightInvalidRows({
+        treatEmptyAsMissing: true,
+        recordSource: record.source
+      })
+  }) }}
+{% endset %}
+
+{{ appSummaryCard({
+  classes: "govuk-!-margin-bottom-6",
+  titleText: "Trainee progress",
+  html: traineeProgressHtml
+}) }}

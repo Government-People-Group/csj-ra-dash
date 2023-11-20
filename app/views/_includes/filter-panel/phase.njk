@@ -1,0 +1,28 @@
+{{ govukCheckboxes({
+  classes: "govuk-checkboxes--small js-auto-submit",
+  fieldset: {
+    legend: {
+      text: "Case status",
+      isPageHeading: false,
+      classes: "govuk-fieldset__legend--s"
+    }
+  },
+  items: [
+    {
+      text: "Urgent",
+      checked: checked(query.filterPhase, "Early years")
+    },
+    {
+      text: "In progress",
+      checked: checked(query.filterPhase, "Primary")
+    },
+    {
+      text: "Not started",
+      checked: checked(query.filterPhase, "Secondary")
+    },
+    {
+      text: "Completed",
+      checked: checked(query.filterPhase, "Secondary")
+    }
+  ]
+} | decorateAttributes(data, "data.filterPhase"))}}

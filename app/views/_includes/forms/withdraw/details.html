@@ -1,0 +1,74 @@
+
+{% include "_includes/trainee-name-caption.njk" %}
+
+{# {% set customWithdrawalReason %}
+  {{ govukInput({
+    label: {
+        text: "Enter the reason for withdrawal",
+        classes: "govuk-label govuk-label--s"
+    },
+    classes: "govuk-!-width-two-thirds"
+  } | decorateAttributes(record, "record.withdraw.reasonOther")) }}
+{% endset %} #}
+
+{# Remove these as we're going to add them manually with 'or' text #}
+{% set specialCaseReasons = ['Unknown', 'Another reason'] %}
+
+{% set withdrawalReasonsWithoutSpecial = data.withdrawalReasons | removeArrayItems(specialCaseReasons) %}
+
+{% set withdrawalReasonsItems = []  %}
+
+{% for reason in withdrawalReasonsWithoutSpecial %}
+  {# {% set conditionalInput %}
+    {{ govukInput({
+      label: {
+          text: "Extra detail about " + (reason | lower),
+          text: "Details (optional)",
+          classes: "govuk-label"
+      },
+      _classes: "govuk-!-width-three-quarters"
+    } | decorateAttributes(record, "record.withdraw.reasonOther")) }}
+  {% endset %} #}
+
+  {% set withdrawalReasonsItems = withdrawalReasonsItems | push ({
+    text: reason,
+    _conditional: {
+      html: conditionalInput
+    }
+  }) %}
+{% endfor %}
+
+{# {% set withdrawalReasonsItems = withdrawalReasonsItems | push ({
+  divider: "or"
+}) %} #}
+
+{% set withdrawalReasonsItems = withdrawalReasonsItems | push ({
+  text: "Another reason"
+}) %}
+
+{% set withdrawalReasonsItems = withdrawalReasonsItems | push ({
+  divider: "or"
+}) %}
+
+{% set withdrawalReasonsItems = withdrawalReasonsItems | push ({
+  text: "Unknown",
+  behaviour: "exclusive"
+}) %}
+
+{{ govukCheckboxes({
+  fieldset: {
+    legend: {
+      text: pageHeading,
+      isPageHeading: true,
+      classes: "govuk-fieldset__legend--l"
+    }
+  },
+  hint: {
+    text: "Select all that apply"
+  },
+  items: withdrawalReasonsItems
+} | decorateAttributes(record, "record.withdraw.reasons")) }}
+
+{{ govukButton({
+  text: "Continue"
+}) }}

@@ -1,0 +1,367 @@
+{% set courseDetails = record.courseDetails %}
+
+{% set isPublishCourse = courseDetails.isPublishCourse | falsify %}
+
+{% set expectedDuration = 'Not provided' %}
+{% if courseDetails.duration | falsify %}
+  {% set expectedDuration = courseDetails.duration + " years" %}
+{% endif %}
+
+{% macro courseAndRouteHtml(record, minimalPublishSummary) %}
+  {% set isPublishCourse = record.courseDetails.isPublishCourse | falsify %}
+  <p class="govuk-body">{{record.route}}</p>
+  <div class="govuk-hint">
+    {% if isPublishCourse %}
+      {{ record.courseDetails.courseNameLong }}
+    {% else %}
+      {{ record | getAllocationSubject }}
+    {% endif %}
+  </div>
+{% endmacro %}
+
+{% macro getCourseMoveLinkPath(defaultPath, nextPath, referrer, showCourseMoveQuestionUpFront) -%}
+  {%- if showCourseMoveQuestionUpFront -%}
+    {{- defaultPath + '/course-change-date-question'| addReferrer(defaultPath + nextPath) -}}
+  {% else %}
+    {{ (defaultPath + nextPath) | addReferrer(referrer) }}
+  {%- endif -%}
+{%- endmacro %}
+
+{% set testUrl = getCourseMoveLinkPath((recordPath + "/course-details"), '/select-route', referrer, showCourseMoveQuestionUpFront).val %}
+
+
+{% set courseRow = {
+  key: {
+    text: "Course" if not showPreviousCourse else "New course"
+  },
+  value: {
+    html: courseAndRouteHtml(record, minimalPublishSummary) | safe | trim or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/select-route" | addReferrer(referrer),
+        href: getCourseMoveLinkPath((recordPath + "/course-details"), '/select-route', referrer, showCourseMoveQuestionUpFront),
+        text: "Change",
+        visuallyHiddenText: "course"
+      }
+    ]
+  } if canAmend
+} %}
+
+{# Shown if trainee has been on a previous course - this is the date they started the latest course #}
+{% set dateMovedRow = {
+  key: {
+    text: "Date changed to this course"
+  },
+  value: {
+    html: (record.historicCourseDetails | last).dateFinished | govukDate or 'Not provided',
+    classes: "govuk-hint"
+  }
+} if record.historicCourseDetails %}
+
+{# For use in course move flow #}
+{% set previousRecord = data.records | getRecordById(record.id) %}
+{% set previousCourseRow = {
+  key: {
+    text: "Previous course"
+  },
+  value: {
+    html: courseAndRouteHtml(previousRecord, minimalPublishSummary) | safe | trim or 'Not provided',
+    classes: "govuk-hint"
+  }
+} %}
+
+{% set educationPhaseRow = {
+  key: {
+    text: "Education phase"
+  },
+  value: {
+    text: courseDetails.phase | sentenceCase or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/phase" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "education phase"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set subjectsRow = {
+  key: {
+    text: "Subject" | pluralise(courseDetails.subjects | length)
+  },
+  value: {
+    text: courseDetails.subjects | prettifySubjects or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "subject"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set ageRangeRow = {
+  key: {
+    text: "Age range"
+  },
+  value: {
+    text: courseDetails.ageRange or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "age range"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set studyModeRow = {
+  key: {
+    text: "Full time or part time"
+  },
+  value: {
+    text: courseDetails.studyMode or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "full time or part time"
+      }
+    ]
+  } if canAmend
+} if record | requiresField("studyMode") %}
+
+{% set apprenticeshipStartDateRow = {
+  key: {
+    text: "Apprenticeship start date"
+  },
+  value: {
+    text: courseDetails.apprenticeshipStartDate | govukDate or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "apprenticeship start date"
+      }
+    ]
+  } if canAmend
+} if record | requiresField("apprenticeshipStartDate") %}
+
+{% set startDateRow = {
+  key: {
+    text: "ITT start date"
+  },
+  value: {
+    text: courseDetails.startDate | govukDate or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "ITT start date"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set endDateRow = {
+  key: {
+    text: "Expected end date"
+  },
+  value: {
+    text: courseDetails.endDate | govukDate,
+    text: (courseDetails.endDate | govukDate) or ("Expected in academic year " + record | calculateCourseEndAcademicYear)
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "expected end date"
+      }
+    ]
+  } if canAmend
+} %}
+
+{% set courseMove = record.temp.courseMoveTemp %}
+
+{% set courseMoveHtml -%}
+  {%- if courseMove -%}
+    {%- if courseMove.isCourseMove | falsify -%}
+      {{- courseMove.courseMoveDate | govukDate -}}
+    {%- else -%}
+      Not applicable, this is not a course change
+    {%- endif -%}
+  {%- else -%}
+    Not provided
+  {%- endif -%}
+{% endset %}
+
+{% set courseMoveRowHref -%}
+  {%- if courseMove.courseMoveUpFront | falsify -%}
+    /course-details/course-change-date
+  {%- else -%}
+    /course-details/course-change-date-question
+  {%- endif -%}
+{%- endset %}
+
+{% set courseMoveRow = {
+  key: {
+    text: "Course change date" if not courseMove.isCourseMove | falsify else "Course change date"
+  },
+  value: {
+    text: courseMoveHtml | safe or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: (recordPath + courseMoveRowHref) | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "change of course question"
+      }
+    ]
+  } if canAmend
+} if record | isNonDraft %}
+
+{# {% set durationRow = {
+  key: {
+    text: "Duration"
+  },
+  value: {
+    text: courseDetails.duration + (' year' | pluralise(courseDetails.duration)) or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/details" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "duration"
+      }
+    ]
+  } if canAmend
+} %} #}
+
+{% set allocatedPlaceRow = {
+  key: {
+    text: "Trainee using an allocated place"
+  },
+  value: {
+    text: courseDetails.allocatedPlace or 'Not provided'
+  },
+  actions: {
+    items: [
+      {
+        href: recordPath + "/course-details/allocated-place" | addReferrer(referrer),
+        text: "Change",
+        visuallyHiddenText: "allocated place"
+      }
+    ]
+  } if canAmend
+} if record | hasAllocatedPlaces and not hideAllocationRow %}
+
+{% if record | isEarlyYears %}
+
+  {% set courseDetailsRows = [
+    courseRow,
+    studyModeRow,
+    startDateRow,
+    endDateRow,
+    courseMoveRow if showCourseMoveRow,
+    dateMovedRow if showDateMovedRow
+  ] %}
+
+{% else %}
+
+  {% set courseDetailsRows = [
+    courseRow,
+    educationPhaseRow,
+    subjectsRow,
+    ageRangeRow,
+    studyModeRow,
+    apprenticeshipStartDateRow,
+    startDateRow,
+    endDateRow,
+    courseMoveRow if showCourseMoveRow,
+    dateMovedRow if showDateMovedRow
+  ] %}
+
+{% endif %}
+
+{# For apply drafts only - show a very minimal card with details of course #}
+{% if minimalPublishSummary %}
+  {% set courseDetailsRows = [
+    courseRow,
+    courseMoveRow if showCourseMoveRow,
+    previousCourseRow if showPreviousCourse
+  ] | removeEmpty %}
+{% endif %}
+
+{% set courseDetailsHtml %}
+  {{ govukSummaryList({
+    rows: courseDetailsRows | highlightInvalidRows({
+        treatEmptyAsMissing: true,
+        recordSource: record.source
+      })
+  }) }}
+{% endset %}
+
+
+{% set complete = courseDetails | sectionIsComplete %}
+{% set status  = courseDetails | getStatusText %}
+{% set sectionIsRequired = record | requiresSection("courseDetails") %}
+
+{% if not sectionIsRequired %}
+  {# Section not required #}
+{% elseif showIncomplete and not complete %}
+
+  {% set incompleteType = "warning" if errorList %}
+  {% set incompleteId = "course-details" %}
+  {% if status == "Review" %}
+    {% set incompleteText = "Course details not reviewed" %}
+    {% set courseNeedsToBeConfirmed = courseDetails | courseNeedsToBeConfirmed %}
+    {% set courseDetailsHref = "/course-details/confirm-course" if courseNeedsToBeConfirmed else "/course-details/confirm" %}
+    {% set incompleteLink = recordPath + courseDetailsHref %}
+    {% set incompleteLinkText = "Review section" %}
+  {% elseif status == "In progress" %}
+    {% set incompleteText = "Course details not marked as complete" %}
+    {% set incompleteLink = recordPath + "/course-details/confirm" %}
+    {% set incompleteLinkText = "Continue section" %}
+  {% else %}
+    {% set incompleteText = "Course details not started" %}
+    {% set incompleteLink = recordPath + "/course-details" %}
+    {% set incompleteLinkText = "Start section" %}
+  {% endif %}
+
+  {% include "_includes/incomplete.njk" %}
+
+{% else %}
+
+  {{ appSummaryCard({
+    classes: "govuk-!-margin-bottom-6",
+    titleText: "Course details",
+    actions: {
+      items: [{
+        href: recordPath + "/course-details/is-course-change" | addReferrer(referrer),
+        text: "Move the trainee to a new course"
+      }]
+    } if canAmend and showCourseChangeOption,
+    html: courseDetailsHtml
+  }) }}
+  
+{% endif %}

@@ -1,0 +1,26 @@
+
+{{ appSubNavigation({
+  label: 'Sub navigation',
+  classes: 'govuk-!-margin-bottom-4',
+  items: [{
+    text: 'About their teacher training',
+    href: recordPath,
+    active: (activeTab == "trainee-details")
+  },
+  {
+    text: 'Personal details and education' if record | requiresSection("degree") else 'Personal details',
+    href: recordPath + '/personal-details',
+    active: (activeTab == "personal-details")
+  },
+  {
+    text: "Timeline",
+    href: recordPath + '/timeline',
+    active: (activeTab == "timeline")
+  },
+  {
+    text: "Admin",
+    href: recordPath + '/admin',
+    active: (activeTab == "admin")
+  } if data.isAdmin
+  ]
+}) }}

@@ -1,0 +1,35 @@
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">{{pageHeading}}</h1>
+
+<p class="govuk-body">You can add placements at any time whenever you have the details. To recommend the trainee for {{ record | getQualificationText }}, you must have provided the details of {{data.settings.minPlacementsRequired}} {{"placement" | pluralise(data.settings.minPlacementsRequired)}}.</p>
+
+<p class="govuk-body">
+  <a href="https://www.gov.uk/government/publications/initial-teacher-training-criteria/initial-teacher-training-itt-criteria-and-supporting-advice#c23-training-in-schools" class="govuk-link">Read DfE guidance about school placements</span></a>.
+</p>
+
+{{ govukRadios({
+  fieldset: {
+    legend: {
+      text: "Do you have any of the trainee’s placement details?",
+      isPageHeading: false,
+      classes: "govuk-fieldset__legend--m"
+    }
+  },
+  items: [
+    {
+      value: "Yes",
+      text: "Yes, I can add at least one of them now"
+    },
+    {
+      value: "Not yet",
+      text: "No, I’ll add them later",
+      _hint: {
+        text: "You will need to add placement details before you can recommend for " + record | getQualificationText
+      }
+    }
+  ]
+} | decorateAttributes(record, "record.placement.hasPlacements"))}}
+
+{{ govukButton({
+  text: "Continue"
+}) }}

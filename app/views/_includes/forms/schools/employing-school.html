@@ -1,0 +1,62 @@
+{% include "_includes/trainee-name-caption.njk" %}
+<h1 class="govuk-heading-l">
+  {{pageHeading}}
+</h1>
+
+{% set label = "Search for a school by its unique reference number (URN), name or postcode" %}
+
+{# Todo - this could probably be the default that the autocomplete progressively enhances #}
+<div class="app-no-js-only">
+  {{ govukInput({
+    id: "schoolSearch",
+    name: "_schoolSearch",
+    label: {
+      text: label
+    },
+    value: query._schoolSearch,
+    classes: 'app-!-max-width-two-thirds'
+  }) }}
+</div>
+
+<div class="app-js-only">
+  {{ appSchoolAutocomplete({
+    name: "_autocomplete_result_uuid",
+    value: record.schools.employingSchool.schoolName,
+    uuid: record.schools.employingSchool.uuid,
+    label: {
+      text: label
+    }
+  }) }}
+</div>
+
+{% set detailsHtml %}
+
+  <p class="govuk-body">
+    If the employing school is missing from the list, try searching for its unique reference number (URN) on <a href="#">Get information about schools (opens in a new tab)</a>.
+  </p>
+
+  <p class="govuk-body">
+    If you still cannot find the school, contact <a class="govuk-link" href="mailto:becomingateacher@digital.education.gov.uk">becomingateacher@digital.education.gov.uk</a>
+  </p>
+
+  <p class="govuk-body">You do not need to provide an employing school if the trainee is funded or employed privately.</p>
+
+  {{ govukCheckboxes({
+    items: [
+      {
+        value: "true",
+        text: "Employing school is not applicable"
+      }
+    ]
+    } | decorateAttributes(record, "record.schools.employingSchool.notApplicable")) }}
+{% endset %}
+
+{{ govukDetails({
+  summaryText: "Employing school is not listed, or the trainee is funded or employed privately",
+  html: detailsHtml,
+  open: true if record.schools.employingSchool.notApplicable == "true"
+}) }}
+
+{{ govukButton({
+  text: "Continue"
+}) }}
