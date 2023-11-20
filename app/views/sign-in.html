@@ -6,16 +6,39 @@
 <div class="govuk-grid-row">
   <div class="govuk-grid-column-two-thirds-from-desktop">
 
-    <h1 class="govuk-heading-l">{{pageHeading}}</h1>
+    <h1 class="govuk-heading-l">Sign in</h1>
 
-    <p class="govuk-body">Use DfE Sign-in to access your account.</p>
 
-    {{ govukButton({
-      "text": "Continue to DfE Sign-in",
-      href: "dfe-sign-in"
-    }) }}
 
-    <p class="govuk-body">If you do not have a DfE Sign-in account but need access to Register trainee teachers, email <a class="govuk-link" href="mailto:becomingateacher@digital.education.gov.uk?subject=Get%20access%20to%20Register%20trainee%20teachers">becomingateacher@digital.education.gov.uk</a>.</p>
+    <div class="govuk-grid-row">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="event-name">
+          Email
+        </label>
+        <input class="govuk-input govuk-input--width-20" id="event-name" name="eventName" type="text">
+      </div>
+    </div>
+    <div class="govuk-grid-row">
+      <div class="govuk-form-group">
+        <label class="govuk-label" for="event-name">
+          Password
+        </label>
+        <input class="govuk-input govuk-input--width-20" id="event-name" name="eventName" type="text">
+      </div>
+      {% if data['user']==1%}
+      <form action="home" method="post" novalidate>
+          <button class="govuk-button" data-module="govuk-button"   >
+            Sign in
+          </button>
+      {% else %}
+      <form action="records" method="post" novalidate>
+          <button class="govuk-button" data-module="govuk-button"   >
+            Sign in
+          </button>
+      {% endif %}
+    </div>
+
+
 
   </div>
 </div>
