@@ -87,7 +87,7 @@
           <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
           <strong class="govuk-warning-text__text">
             <span class="govuk-warning-text__assistive">Warning</span>
-            This application includes a TIMED test.
+            <a href="#banked-scores" class="govuk-link govuk-link--no-visited-state">Candidate has a valid banked score for the Numerical Test</a>
           </strong>
         </div>
         <div class="govuk-summary-card__content">
@@ -119,6 +119,16 @@
               </dd>
 
             </div>
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key" style="max-width:15%">
+                Test types for this vacancy
+              </dt>
+              <dd class="govuk-summary-list__value">
+                1. Numerical Test<br>
+                2. Verbal Test
+              </dd>
+
+            </div>
 
           </dl>
         </div>
@@ -135,6 +145,12 @@
             <div class="govuk-radios__item">
               <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
               <label class="govuk-label govuk-radios__label" for="changedName">
+                Use banked score for Numerical Test
+              </label>
+            </div>
+            <div class="govuk-radios__item">
+              <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
+              <label class="govuk-label govuk-radios__label" for="changedName">
                 Increase time allowed for test
               </label>
             </div>
@@ -144,6 +160,7 @@
                 Reject request
               </label>
             </div>
+            <div class="govuk-radios__divider">or</div>
             <div class="govuk-radios__item">
               <input class="govuk-radios__input" id="changedName-2" name="changedName" type="radio" value="year">
               <label class="govuk-label govuk-radios__label" for="changedName-2">
@@ -154,10 +171,17 @@
         </fieldset>
       </div>
 
-      <button class="govuk-button" data-module="govuk-button">
-        Continue
-      </button>
 
+  <form action="records" method="post" novalidate>
+        <div class="govuk-button-group">
+          <button class="govuk-button" data-module="govuk-button">
+            Continue
+          </button>
+
+          <button class="govuk-button govuk-button--secondary" data-module="govuk-button">
+            Return to case list
+          </button>
+        </div>
 
 
         </div>
@@ -578,7 +602,7 @@
           </div><br><br>
           <div class="govuk-summary-card">
             <div class="govuk-summary-card__title-wrapper">
-              <h2 class="govuk-summary-card__title">Judgement Test</h2>
+              <h2 class="govuk-summary-card__title">Numerical Test</h2>
             </div>
 
             <div class="govuk-summary-card__content">
