@@ -83,18 +83,22 @@
         <div class="govuk-summary-card__title-wrapper">
           <h2 class="govuk-summary-card__title">Tests</h2>
         </div>
-        <div class="govuk-warning-text" style="margin:20px 0px 0px 20px">
-          <span class="govuk-warning-text__icon" aria-hidden="true">!</span>
-          <strong class="govuk-warning-text__text">
-            <span class="govuk-warning-text__assistive">Warning</span>
-            <a href="#banked-scores" class="govuk-link govuk-link--no-visited-state">Candidate has a valid banked score for the Numerical Test</a>
-          </strong>
-        </div>
+
         <div class="govuk-summary-card__content">
           <dl class="govuk-summary-list">
             <div class="govuk-summary-list__row">
               <dt class="govuk-summary-list__key" style="max-width:15%">
-                Candidate raised request
+                Test types for this vacancy
+              </dt>
+              <dd class="govuk-summary-list__value">
+                1. Numerical Test - <span><a href="#banked-scores" class="govuk-link govuk-link--no-visited-state">Candidate has a valid banked score for this test</a> and will auto progress.</span><br><br>
+                2. Customer Service Test<br><br>
+              </dd>
+            </div>
+
+            <div class="govuk-summary-list__row">
+              <dt class="govuk-summary-list__key" style="max-width:15%">
+                Candidate raised request<br><br>
               </dt>
               <dd class="govuk-summary-list__value">
                 27 March 2024
@@ -110,7 +114,7 @@
 
                   <section class="moj-ticket-panel__content moj-ticket-panel__content--blue" aria-label="Section 1">
 
-                    <p class="govuk-body">I have dyscalculia and struggle to process numbers. The practise test online has some numerical questions and I will need more than the allocated time to be able to answer to the best of my ability.<br><br>Please allow me extra time to complete the test.</p>
+                    <p class="govuk-body">I have dyslexia and struggle to process words. I will need more than the allocated time to be able to answer to the best of my ability.<br><br>Please allow me extra time to complete the test.</p>
 
                   </section>
 
@@ -119,16 +123,7 @@
               </dd>
 
             </div>
-            <div class="govuk-summary-list__row">
-              <dt class="govuk-summary-list__key" style="max-width:15%">
-                Test types for this vacancy
-              </dt>
-              <dd class="govuk-summary-list__value">
-                1. Numerical Test<br>
-                2. Verbal Test
-              </dd>
 
-            </div>
 
           </dl>
         </div>
@@ -142,16 +137,11 @@
             </h1>
           </legend>
           <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+
             <div class="govuk-radios__item">
               <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
               <label class="govuk-label govuk-radios__label" for="changedName">
-                Use banked score for Numerical Test
-              </label>
-            </div>
-            <div class="govuk-radios__item">
-              <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
-              <label class="govuk-label govuk-radios__label" for="changedName">
-                Increase time allowed for test
+                Increase time allowed for Customer Service Test
               </label>
             </div>
             <div class="govuk-radios__item">
@@ -568,7 +558,7 @@
 
           <div class="govuk-summary-card">
             <div class="govuk-summary-card__title-wrapper">
-              <h2 class="govuk-summary-card__title">Customer Service Test</h2>
+              <h2 class="govuk-summary-card__title">Verbal Test</h2>
             </div>
 
             <div class="govuk-summary-card__content">
