@@ -22,10 +22,9 @@
 
 
   <div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds-from-desktop" style="width:50%">
-      <h2 class="govuk-heading-xl" style="margin-bottom:5px;">Carolyn Hall<strong class="govuk-tag govuk-tag--red" style="float:right;color:#ffffff;background-color:#d4351c;margin-top:15px">Closes in 1 day</strong></h2>
-      <span class="govuk-caption-l">Candidate: 234234423</span>
-      <span class="govuk-caption-l">Job reference: 321224</span><br>
+    <div class="govuk-grid-column-two-thirds-from-desktop" style="width:45%">
+      <h2 class="govuk-heading-xl" style="margin-bottom:0px;">Carolyn Hall<strong class="govuk-tag govuk-tag--red" style="float:right;color:#ffffff;background-color:#d4351c;margin-top:15px">Urgent</strong></h2>
+      <span class="govuk-caption-l">Applicant ID: 9837464</span><br>
     </div>
   </div><br><br>
 
@@ -56,14 +55,14 @@
               Job ad
             </a>
           </li>
-          <!-- <li class="govuk-tabs__list-item"> -->
-            <!-- <a class="govuk-tabs__tab" href="#banked-scores" style="font-size:0.99rem"> -->
-              <!-- Banked scores -->
-            <!-- </a> -->
-          <!-- </li> -->
+          <li class="govuk-tabs__list-item">
+            <a class="govuk-tabs__tab" href="#banked-scores" style="font-size:0.99rem">
+              Banked scores
+            </a>
+          </li>
           <li class="govuk-tabs__list-item">
             <a class="govuk-tabs__tab" href="#timeline" style="font-size:0.99rem">
-              Case history
+              Timeline
             </a>
           </li>
           <li class="govuk-tabs__list-item">
@@ -115,15 +114,15 @@
                 Test types for this vacancy
               </dt>
               <dd class="govuk-summary-list__value">
-                1. Numerical Test - <span><strong>Candidate has a valid banked score for this test</strong> and will auto progress.</span><br><br>
+                1. Numerical Test - <span><a href="#banked-scores" class="govuk-link govuk-link--no-visited-state">Candidate has a valid banked score for this test</a> and will auto progress.</span><br><br>
                 2. Customer Service Test<br>
               </dd>
             </div>
           </dl>
         </div>
-      </div><br>
+      </div><br><br>
 
-      <!-- <div class="govuk-form-group">
+      <div class="govuk-form-group">
         <fieldset class="govuk-fieldset">
           <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
             <h1 class="govuk-fieldset__heading">
@@ -153,13 +152,13 @@
             </div>
           </div>
         </fieldset>
-      </div> -->
+      </div>
 
 
-  <form action="options-carolyn-hall" method="post" novalidate>
+  <form action="records" method="post" novalidate>
         <div class="govuk-button-group">
           <button class="govuk-button" data-module="govuk-button">
-            See options for this case
+            Continue
           </button>
 
           <button class="govuk-button govuk-button--secondary" data-module="govuk-button">
@@ -825,7 +824,7 @@
     </div>
 
   </div>
-
+  <hr class="govuk-section-break govuk-section-break--l govuk-section-break--visible">
 
 
 {% endblock %}

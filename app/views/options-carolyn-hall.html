@@ -1,0 +1,97 @@
+{% extends "layouts/main.html" %}
+
+
+
+
+{% block content %}
+
+<style>
+  div.govuk-tabs__panel {
+    border-left:1px solid #b1b4b6 !important;
+    border-right:1px solid #b1b4b6 !important;
+    border-bottom:1px solid #b1b4b6 !important;
+  }
+
+  .govuk-main-wrapper--auto-spacing:first-child, .govuk-main-wrapper--l {
+    padding-top: 20px;
+}
+</style>
+
+
+<a class="govuk-back-link" href="javascript:window.history.back()" style="margin-top:0px; margin-bottom:20px">Back</a>
+
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop" style="width:45%">
+      <h2 class="govuk-heading-xl" style="margin-bottom:5px;">Carolyn Hall<strong class="govuk-tag govuk-tag--red" style="float:right;color:#ffffff;background-color:#d4351c;margin-top:15px">Urgent</strong></h2>
+      <span class="govuk-caption-l">Candidate: 234234423</span>
+      <span class="govuk-caption-l">Job reference: 321224</span><br>
+    </div>
+  </div><br><br>
+
+
+
+  <div class="govuk-form-group">
+    <fieldset class="govuk-fieldset">
+      <legend class="govuk-fieldset__legend govuk-fieldset__legend--m">
+        <h1 class="govuk-fieldset__heading">
+          Options
+        </h1>
+      </legend>
+      <div class="govuk-radios govuk-radios--small" data-module="govuk-radios">
+
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
+          <label class="govuk-label govuk-radios__label" for="changedName">
+            Increase time allowed for Customer Service Test
+          </label>
+        </div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
+          <label class="govuk-label govuk-radios__label" for="changedName">
+            Contact vacancy holder about this request
+          </label>
+        </div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="changedName" name="changedName" type="radio" value="month">
+          <label class="govuk-label govuk-radios__label" for="changedName">
+            Contact candidate about this request
+          </label>
+        </div>
+        <div class="govuk-radios__divider">or</div>
+        <div class="govuk-radios__item">
+          <input class="govuk-radios__input" id="changedName-2" name="changedName" type="radio" value="year">
+          <label class="govuk-label govuk-radios__label" for="changedName-2">
+            Unlock this case or assign to another agent
+          </label>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="govuk-button-group">
+    <button class="govuk-button" data-module="govuk-button">
+      Continue
+    </button>
+
+
+  </div>
+
+  <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds-from-desktop">
+      <h2 class="govuk-heading-m">Guidance</h2>
+
+      <ul class="govuk-list govuk-list--spaced">
+        <li><a class="govuk-link" href="#">Working a reasonable adjustments case</a></li>
+        <li><a class="govuk-link" href="#">Reasonable adjustment policies and legislation</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+
+
+{% endblock %}
