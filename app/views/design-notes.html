@@ -1,0 +1,86 @@
+{% extends "layouts/main.html" %}
+
+{% block pageTitle %}
+Home – {{ serviceName }} – GOV.UK Prototype Kit
+{% endblock %}
+
+
+
+{% block content %}
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+    <h1 class="govuk-heading-l">Design notes</h1>
+
+<a href="#dashv2" class="govuk-link govuk-link--no-visited-state" style="display:block">Dashboard notes - v2 (following initial UR with recruiters)</a><br><a href="#dashv1" class="govuk-link govuk-link--no-visited-state" style="display:block">Dashboard notes - V1 (based on RAST workshop input)</a><br>
+</div></div>
+
+
+<div class="govuk-grid-row">
+  <div class="govuk-grid-column-two-thirds">
+
+    <h3 class="govuk-heading-s" style="margin-bottom:5px">V2</h3><br>
+      <p class="govuk-body"><strong>Aim</strong></p>
+      <p class="govuk-body">V2 was an updated version of V1, based on the UR feedback received for V1. Our aim was to:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>remove the banked score tab that was considered unnecessary</li>
+        <li>change some misleading content e.g. 'timeline' to 'case history'</li>
+        <li>change button content so users had less fear about what the button would do (case overview tab)</li>
+        <li>add extra contact options for the caseworker</li>
+        <li>add missing reference numbers</li>
+        <li>change the 'urgent' tag to something more meaningful</li>
+        <li>hide completed cases</li>
+      </ul><br>
+
+      <p class="govuk-body"><strong>What we did</strong></p>
+      <p class="govuk-body">We made the above changes to create a <a href="https://csj-ra-dash-7b67361d8c62.herokuapp.com/home" target="_blank">V2 version of the dashboard</a>.</p>
+
+      <p class="govuk-body"><strong>User research</strong></p>
+      <p class="govuk-body">Not tested yet</p><br>
+      
+        <br>
+        <hr class="govuk-section-break govuk-section-break--s govuk-section-break--visible"><br>
+
+
+    <h3 class="govuk-heading-s" style="margin-bottom:5px" id="dashv1">V1</h3><br>
+      <p class="govuk-body"><strong>Aim</strong></p>
+      <p class="govuk-body">Following on from V1, our aim was to:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>change the look / feel from Career Site to more GDS-aligned styling</li>
+        <li>add a search jobs facility on the portal page itself</li>
+        <li>show a reuseable info section so users could see that they didn't have to repeat certain info entries every time they applied</li>
+        <li>let the user save a job</li>
+        <li>let the user set up a job alert</li>
+        <li>iterate the design based on V1 feedback e.g. more detailed application section, status tags, change 'Messages' to guidance panels</li>
+      </ul><br>
+
+      <p class="govuk-body"><strong>What we did</strong></p>
+      <p class="govuk-body">We redesigned the portal page with a GDS-friendly look, and then offered users two variants:</p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li><a href="https://csj-candidate-experience.herokuapp.com/portal-gds-1" target="_blank">an iterated (from V1) portal but still based on a series of info panels</li>
+        <li><a href="https://csj-candidate-experience.herokuapp.com/portal-gds-tabs" target="_blank">a more concise version, using tabs to compartmentalise the same info as on the non-tabbed version</a>. This was for a quick user view to see if they preferred seeing less info than on the normal version.</li>
+      </ul>
+
+      <p class="govuk-body"><strong>User research</strong></p>
+      <p class="govuk-body"><a href="https://app.mural.co/t/civilservicerecruitment8943/m/civilservicerecruitment8943/1685443464412/ca1f3c757df02ee26d08181a7e9d264cff731c4e?sender=u21f36a9fedce292b06138582" target="_blank">Mural board with testing notes</a></p><br>
+      <p class="govuk-body"><strong>What we found</strong></p>
+      <ul class="govuk-list govuk-list--bullet">
+        <li>the improved applications panel was very successful, with all users understanding what each application type was</li>
+        <li>the status tags were also very successful, especially the red one warning of an impending deadline</li>
+        <li>users liked the targeted guidance panels and usually understood why they were seeing particular ones at a certain point</li>
+        <li>there was some debate over the placement of the details section, with some happy with it's position but others suggesting it should be in the top nav bar. Either way, the hidden details was preferred to the previous version in V1</li>
+        <li>users understood and liked the reuseable info section</li>
+        <li>all users were able to navigate the saved job and job alert journeys and had no major concerns with either</li>
+        <li>interestingly, a number of users said they'd prefer video content when been given guidance - in stark contrast to opinion on videos on the initial landing page prototype. This implies that while generic 'corporate' videos are not welcomed, they can be valuable when giving instructions or advice</li>
+        <li>a number of users felt that setting up job alerts was mentioned too many times</li>
+        <li>users still struggled to see how to create an account on the sign in page</li>
+        <li>the notification banner for a saved job might be better placed on the saved ad itself, rather than the top of the page as per standards</li>
+        <li>the 'new' tag was a success, although some users felt it should be more prominent e.g. in a coloured box, bolder, bigger etc</li>
+        <li>most users preferred the initial 'all on one page' design over the tabbed version, indicating that the amount of info on the former page is not overwhelming as was first feared</li></ul><br><br>
+        <hr class="govuk-section-break govuk-section-break--s govuk-section-break--visible"><br>
+        <br>
+        </div><br><br><br>
+
+
+
+
+{% endblock %}
